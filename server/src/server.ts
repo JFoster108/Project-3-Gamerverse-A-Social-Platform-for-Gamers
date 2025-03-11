@@ -115,4 +115,36 @@ app.get("/api/users/me", authMiddleware, async (req, res) => {
   res.json(user);
 });
 
+// Profile Update Route
+app.put("/api/users/me", authMiddleware, async (req, res) => {
+  try {
+    const updates = req.body;
+    delete updates.password; // Prevent password updates via this route
+    const user = await User.findByIdAndUpdate(req.body.user.id, updates, { new: true, runValidators: true }).select("-password");
+    res.json({ message: "Profile updated successfully", user });
+  } catch (err) {
+    res.status(500).json({ message: "Error updating profile" });
+  }
+});
+
+// Password Change Route
+app.put("/api/auth/change-password", authMiddleware, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const user = await User.findById(req.body.user.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+    
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) return res.status(400).json({ message: "Current password is incorrect" });
+    
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedNewPassword;
+    await user.save();
+    
+    res.json({ message: "Password updated successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Error updating password" });
+  }
+});
+
 export default app;
