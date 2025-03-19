@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import nodemailer from "nodemailer";
+import crypto from "crypto";
 import { Request, Response } from "express";
 
 dotenv.config();
@@ -39,6 +41,8 @@ interface IUser {
     steam?: string;
   };
   isPrivate: boolean;
+  resetPasswordToken?: string;
+  resetPasswordExpires?: Date;
 }
 
 const userSchema = new mongoose.Schema<IUser>({
@@ -55,6 +59,8 @@ const userSchema = new mongoose.Schema<IUser>({
     steam: { type: String },
   },
   isPrivate: { type: Boolean, default: false },
+  resetPasswordToken: { type: String },
+  resetPasswordExpires: { type: Date },
 });
 
 const User = mongoose.model("User", userSchema);
@@ -72,78 +78,56 @@ const authMiddleware = (req: Request, res: Response, next: any) => {
   }
 };
 
-// Authentication Routes
-app.post("/api/auth/signup", async (req, res) => {
-  try {
-    const { username, email, password } = req.body;
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ username, email, password: hashedPassword });
-    await newUser.save();
-    res.status(201).json({ message: "User created successfully" });
-  } catch (err) {
-    res.status(500).json({ message: "Error creating user" });
-  }
+// Nodemailer Setup
+const transporter = nodemailer.createTransport({
+  service: "Gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
 });
 
-app.post("/api/auth/login", async (req, res) => {
+// Request Password Reset
+app.post("/api/auth/request-password-reset", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email } = req.body;
     const user = await User.findOne({ email });
-    if (!user) return res.status(401).json({ message: "Invalid credentials" });
-    
-    const isValid = await bcrypt.compare(password, user.password);
-    if (!isValid) return res.status(401).json({ message: "Invalid credentials" });
-    
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET as string, {
-      expiresIn: "7d",
-    });
-    res.cookie("token", token, { httpOnly: true, secure: true, sameSite: "strict" });
-    res.json({ message: "Login successful" });
-  } catch (err) {
-    res.status(500).json({ message: "Error logging in" });
-  }
-});
-
-app.post("/api/auth/logout", (req, res) => {
-  res.clearCookie("token");
-  res.json({ message: "Logout successful" });
-});
-
-// Protected Route Example
-app.get("/api/users/me", authMiddleware, async (req, res) => {
-  const user = await User.findById(req.body.user.id).select("-password");
-  res.json(user);
-});
-
-// Profile Update Route
-app.put("/api/users/me", authMiddleware, async (req, res) => {
-  try {
-    const updates = req.body;
-    delete updates.password; // Prevent password updates via this route
-    const user = await User.findByIdAndUpdate(req.body.user.id, updates, { new: true, runValidators: true }).select("-password");
-    res.json({ message: "Profile updated successfully", user });
-  } catch (err) {
-    res.status(500).json({ message: "Error updating profile" });
-  }
-});
-
-// Password Change Route
-app.put("/api/auth/change-password", authMiddleware, async (req, res) => {
-  try {
-    const { currentPassword, newPassword } = req.body;
-    const user = await User.findById(req.body.user.id);
     if (!user) return res.status(404).json({ message: "User not found" });
-    
-    const isMatch = await bcrypt.compare(currentPassword, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Current password is incorrect" });
-    
-    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-    user.password = hashedNewPassword;
+
+    const token = crypto.randomBytes(20).toString("hex");
+    user.resetPasswordToken = token;
+    user.resetPasswordExpires = new Date(Date.now() + 3600000); // 1-hour expiration
     await user.save();
-    
-    res.json({ message: "Password updated successfully" });
+
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+    await transporter.sendMail({
+      to: user.email,
+      from: process.env.EMAIL_USER,
+      subject: "Password Reset Request",
+      text: `You requested a password reset. Click here to reset your password: ${resetUrl}`,
+    });
+
+    res.json({ message: "Password reset email sent" });
   } catch (err) {
-    res.status(500).json({ message: "Error updating password" });
+    res.status(500).json({ message: "Error requesting password reset" });
+  }
+});
+
+// Reset Password
+app.post("/api/auth/reset-password", async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+    const user = await User.findOne({ resetPasswordToken: token, resetPasswordExpires: { $gt: new Date() } });
+    if (!user) return res.status(400).json({ message: "Invalid or expired token" });
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+
+    res.json({ message: "Password has been reset successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Error resetting password" });
   }
 });
 
