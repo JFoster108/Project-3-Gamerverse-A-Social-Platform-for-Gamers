@@ -26,6 +26,11 @@ mongoose
   })
   .catch((err) => console.error("MongoDB connection error:", err));
 
+// Ensure environment variables are set
+if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS || !process.env.FRONTEND_URL) {
+  throw new Error("Missing required environment variables: EMAIL_USER, EMAIL_PASS, or FRONTEND_URL");
+}
+
 // User Schema & Model
 interface IUser {
   username: string;
