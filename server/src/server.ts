@@ -6,12 +6,15 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
 import crypto from "crypto";
+import cron from "node-cron";
 import { ApolloServer, ApolloError, AuthenticationError, ForbiddenError } from "apollo-server-express";
 import typeDefs from "./graphql/typeDefs";
 import Post from "./models/Post";
 import Appeal from "./models/Appeal";
 import Report from "./models/Report";
+import ModerationLog from "./models/ModerationLog";
 import resolvers from "./graphql/resolvers";
+import { emailTemplates } from "./utils/emailTemplates";
 
 dotenv.config();
 
@@ -44,6 +47,89 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+// Admin authentication middleware
+function adminAuthMiddleware(req: Request, res: Response, next: NextFunction) {
+  const token = req.cookies.token;
+  if (!token) return res.status(401).json({ message: "Unauthorized" });
+  try {
+    const user: any = jwt.verify(token, process.env.JWT_SECRET as string);
+    if (!user.roles || !user.roles.includes("admin")) {
+      return res.status(403).json({ message: "Forbidden: Admins only." });
+    }
+    req.body.user = user;
+    next();
+  } catch (err) {
+    res.status(403).json({ message: "Invalid token" });
+  }
+}
+
+export async function sendDailyModerationSummary(triggeredBy?: string) {
+  const actions = await ModerationLog.find({
+    date: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+  });
+
+  if (actions.length > 0) {
+    await transporter.sendMail({
+      to: process.env.MOD_EMAIL_NOTIF,
+      from: process.env.EMAIL_USER,
+      subject: "Daily Moderation Summary",
+      html: emailTemplates.moderationSummary(actions),
+    });
+  }
+
+  // Log manual triggers
+  if (triggeredBy) {
+    await ModerationLog.create({
+      moderator_id: triggeredBy,
+      action: "manual_summary_trigger",
+      user_id: null,
+      reason: "Manual daily moderation summary triggered.",
+    });
+  }
+}
+
+// Schedule daily summary at midnight
+cron.schedule("0 0 * * *", async () => {
+  console.log("Running daily moderation summary email...");
+  await sendDailyModerationSummary();
+});
+
+// Manual trigger route (for admin panel)
+app.post("/api/admin/send-moderation-summary", async (req, res) => {
+  try {
+    // Optional: Add admin authentication check here
+    await sendDailyModerationSummary();
+    res.status(200).json({ message: "Moderation summary sent successfully." });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error sending moderation summary." });
+  }
+});
+
+app.get("/api/admin/moderation-logs", adminAuthMiddleware, async (req, res) => {
+  const logs = await ModerationLog.find().sort({ date: -1 }).limit(20);
+  res.json(logs);
+});
+
+app.get("/api/admin/pending-appeals", adminAuthMiddleware, async (req, res) => {
+  const appeals = await Appeal.find({ status: "pending" });
+  res.json(appeals);
+});
+
+app.get("/api/admin/reports", adminAuthMiddleware, async (req, res) => {
+  const reports = await Report.find({ status: "under review" });
+  res.json(reports);
+});
+
+app.get("/api/admin/stats/daily-summary", adminAuthMiddleware, async (req, res) => {
+  const countLogs = await ModerationLog.countDocuments({
+    date: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+  });
+  const countAppeals = await Appeal.countDocuments({ status: "pending" });
+  const countReports = await Report.countDocuments({ status: "under review" });
+  res.json({ countLogs, countAppeals, countReports });
+});
+
 // Utility function for role-based permission checks
 export function checkRole(user: any, allowedRoles: string[]) {
   if (!user || !user.roles || !allowedRoles.some((role) => user.roles.includes(role))) {
@@ -51,13 +137,27 @@ export function checkRole(user: any, allowedRoles: string[]) {
   }
 }
 
-// Admin/Moderator actions integrated with permission checks
+// Admin/Moderator actions with permission checks, audit logging, and HTML email notifications
 export const adminResolvers = {
   Mutation: {
     deletePost: async (_: any, { postId }: any, context: any) => {
       checkRole(context.user, ["admin", "moderator"]);
       await Post.findByIdAndDelete(postId);
-      return "Post deleted successfully.";
+      await ModerationLog.create({
+        moderator_id: context.user.id,
+        action: "delete_post",
+        user_id: null,
+        reason: "Post removed by admin/moderator",
+      });
+
+      await transporter.sendMail({
+        to: process.env.MOD_EMAIL_NOTIF,
+        from: process.env.EMAIL_USER,
+        subject: "Post Deleted Notification",
+        html: emailTemplates.postDeleted(context.user.id, postId),
+      });
+
+      return "Post deleted, logged, and moderators notified.";
     },
 
     flagPost: async (_: any, { postId, reason }: any, context: any) => {
@@ -68,7 +168,21 @@ export const adminResolvers = {
         content_type: "post",
         reason,
       });
-      return "Post flagged for review.";
+      await ModerationLog.create({
+        moderator_id: context.user.id,
+        action: "flag_post",
+        user_id: null,
+        reason,
+      });
+
+      await transporter.sendMail({
+        to: process.env.MOD_EMAIL_NOTIF,
+        from: process.env.EMAIL_USER,
+        subject: "Post Flagged Notification",
+        html: emailTemplates.postFlagged(context.user.id, postId, reason),
+      });
+
+      return "Post flagged, logged, and moderators notified.";
     },
 
     approveAppeal: async (_: any, { appealId, resolution }: any, context: any) => {
@@ -79,7 +193,22 @@ export const adminResolvers = {
       appeal.resolution = resolution;
       appeal.moderator_id = context.user.id;
       await appeal.save();
-      return "Appeal approved successfully.";
+
+      await ModerationLog.create({
+        moderator_id: context.user.id,
+        action: "approve_appeal",
+        user_id: appeal.user_id,
+        reason: resolution,
+      });
+
+      await transporter.sendMail({
+        to: process.env.MOD_EMAIL_NOTIF,
+        from: process.env.EMAIL_USER,
+        subject: "Appeal Approved Notification",
+        html: emailTemplates.appealApproved(context.user.id, appealId, resolution),
+      });
+
+      return "Appeal approved, logged, and moderators notified.";
     },
   },
 };
@@ -101,7 +230,8 @@ app.post("/api/auth/request-password-reset", async (req, res, next) => {
       to: user.email,
       from: process.env.EMAIL_USER,
       subject: "Password Reset Request",
-      text: `You requested a password reset. Click here to reset your password: ${resetUrl}`,
+      html: `<h2>Password Reset Request</h2>
+             <p>Click <a href="${resetUrl}">here</a> to reset your password.</p>`,
     });
 
     res.json({ message: "Password reset email sent" });
