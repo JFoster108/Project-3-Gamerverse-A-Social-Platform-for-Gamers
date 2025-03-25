@@ -1,5 +1,5 @@
-import { createGlobalStyle } from "styled-components";
-import { ThemeType } from "./themes";
+import { createGlobalStyle } from 'styled-components';
+import { ThemeType } from './themes';
 
 export const GlobalStyles = createGlobalStyle<{ theme: ThemeType }>`
   *, *::before, *::after {
@@ -10,7 +10,8 @@ export const GlobalStyles = createGlobalStyle<{ theme: ThemeType }>`
 
   body {
     font-family: 'Inter', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Oxygen',
-      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background-color: ${({ theme }) => theme.colors.background};
@@ -22,7 +23,7 @@ export const GlobalStyles = createGlobalStyle<{ theme: ThemeType }>`
   a {
     color: ${({ theme }) => theme.colors.primary};
     text-decoration: none;
-
+    
     &:hover {
       text-decoration: underline;
     }
@@ -34,11 +35,15 @@ export const GlobalStyles = createGlobalStyle<{ theme: ThemeType }>`
   }
 
   .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 ${({ theme }) => theme.spacing.md};
-    min-height: calc(100vh - 130px); /* Subtract header + footer height */
-  }
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 ${({ theme }) => theme.spacing.md};
+  min-height: calc(100vh - 130px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
   .section {
     margin: ${({ theme }) => theme.spacing.xl} 0;
@@ -75,7 +80,7 @@ export const GlobalStyles = createGlobalStyle<{ theme: ThemeType }>`
     background-color: ${({ theme }) => theme.colors.surface};
     color: ${({ theme }) => theme.colors.text};
     transition: ${({ theme }) => theme.transition};
-
+    
     &:focus {
       outline: none;
       border-color: ${({ theme }) => theme.colors.primary};
@@ -88,15 +93,15 @@ export const GlobalStyles = createGlobalStyle<{ theme: ThemeType }>`
     .container {
       padding: 0 ${({ theme }) => theme.spacing.sm};
     }
-
+    
     h1 {
       font-size: ${({ theme }) => theme.fontSizes.xlarge};
     }
-
+    
     h2 {
       font-size: ${({ theme }) => theme.fontSizes.large};
     }
-
+    
     h3 {
       font-size: ${({ theme }) => theme.fontSizes.medium};
     }
@@ -124,7 +129,7 @@ export const GlobalStyles = createGlobalStyle<{ theme: ThemeType }>`
 
   .grid-2 {
     grid-template-columns: repeat(2, 1fr);
-
+    
     @media (max-width: 768px) {
       grid-template-columns: 1fr;
     }
@@ -132,7 +137,7 @@ export const GlobalStyles = createGlobalStyle<{ theme: ThemeType }>`
 
   .grid-3 {
     grid-template-columns: repeat(3, 1fr);
-
+    
     @media (max-width: 768px) {
       grid-template-columns: 1fr;
     }
@@ -140,11 +145,11 @@ export const GlobalStyles = createGlobalStyle<{ theme: ThemeType }>`
 
   .grid-4 {
     grid-template-columns: repeat(4, 1fr);
-
+    
     @media (max-width: 1024px) {
       grid-template-columns: repeat(2, 1fr);
     }
-
+    
     @media (max-width: 768px) {
       grid-template-columns: 1fr;
     }

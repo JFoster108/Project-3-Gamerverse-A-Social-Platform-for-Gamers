@@ -1,7 +1,7 @@
-import React from "react";
-import { Link, useNavigate } from "react-router-dom";
-import styled from "styled-components";
-import { useAuth } from "../../context/AuthContext";
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
+import { useAuth } from '../../context/AuthContext';
 
 interface HeaderProps {
   toggleTheme: () => void;
@@ -14,7 +14,7 @@ const Header: React.FC<HeaderProps> = ({ toggleTheme, currentTheme }) => {
 
   const handleLogout = () => {
     logout();
-    navigate("/login");
+    navigate('/login');
   };
 
   return (
@@ -41,7 +41,7 @@ const Header: React.FC<HeaderProps> = ({ toggleTheme, currentTheme }) => {
 
         <NavActions>
           <ThemeToggle onClick={toggleTheme}>
-            {currentTheme === "light" ? "🌙" : "☀️"}
+            {currentTheme === 'light' ? '🌙' : '☀️'}
           </ThemeToggle>
 
           {isAuthenticated ? (
@@ -49,9 +49,7 @@ const Header: React.FC<HeaderProps> = ({ toggleTheme, currentTheme }) => {
           ) : (
             <>
               <NavLink to="/login">Login</NavLink>
-              <AuthButton as={Link} to="/signup">
-                Sign Up
-              </AuthButton>
+              <AuthButton as={Link} to="/signup">Sign Up</AuthButton>
             </>
           )}
         </NavActions>
@@ -74,28 +72,31 @@ const NavContainer = styled.nav`
   justify-content: space-between;
   align-items: center;
   max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
   padding: 0 ${({ theme }) => theme.spacing.md};
 
   @media (max-width: 768px) {
     flex-direction: column;
     gap: ${({ theme }) => theme.spacing.md};
+    padding: ${({ theme }) => theme.spacing.sm};
   }
 `;
 
 const Logo = styled.div`
   font-size: ${({ theme }) => theme.fontSizes.xlarge};
   font-weight: 700;
+  padding: ${({ theme }) => theme.spacing.xs} 0;
 `;
 
 const LogoText = styled.div`
   display: flex;
   gap: 5px;
-
+  
   span:first-child {
     color: ${({ theme }) => theme.colors.primary};
   }
-
+  
   span:last-child {
     color: ${({ theme }) => theme.colors.secondary};
   }
@@ -148,7 +149,7 @@ const ThemeToggle = styled.button`
   height: 40px;
   border-radius: 50%;
   transition: ${({ theme }) => theme.transition};
-
+  
   &:hover {
     background-color: ${({ theme }) => `${theme.colors.primary}20`};
   }

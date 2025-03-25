@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
-import styled from "styled-components";
-import { Link } from "react-router-dom";
-import PostCard from "../components/posts/PostCard";
-import FilterBar from "../components/feed/FilterBar";
+import React, { useState, useEffect } from 'react';
+import styled from 'styled-components';
+import { Link } from 'react-router-dom';
+import PostCard from '../components/posts/PostCard';
+import FilterBar from '../components/feed/FilterBar';
 
 // This will be replaced with actual data from the backend
-import { mockPosts } from "../utils/mockData";
+import { mockPosts } from '../utils/mockData';
 
 interface Post {
   id: string;
@@ -32,13 +32,13 @@ const Home: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [page, setPage] = useState<number>(1);
   const [hasMore, setHasMore] = useState<boolean>(true);
-  const [activeFilter, setActiveFilter] = useState<string>("all");
+  const [activeFilter, setActiveFilter] = useState<string>('all');
 
   useEffect(() => {
     // This would be a fetch/GraphQL call to get posts from the backend
     const fetchPosts = () => {
       setLoading(true);
-
+      
       // Simulating API call with a delay
       setTimeout(() => {
         setPosts(mockPosts);
@@ -46,27 +46,25 @@ const Home: React.FC = () => {
         setHasMore(false); // For mock data, we'll pretend there's no more data
       }, 800);
     };
-
+    
     fetchPosts();
   }, []);
 
   const handleFilterChange = (filter: string) => {
     setActiveFilter(filter);
     setLoading(true);
-
+    
     // Simulate API call for filtered data
     setTimeout(() => {
       // In a real app, we would fetch filtered data from the backend
-      if (filter === "all") {
+      if (filter === 'all') {
         setPosts(mockPosts);
       } else {
         // Filter posts based on game console or category
         // This is just for demo purposes
-        setPosts(
-          mockPosts.filter((post) =>
-            post.game?.title.toLowerCase().includes(filter.toLowerCase())
-          )
-        );
+        setPosts(mockPosts.filter((post) => 
+          post.game?.title.toLowerCase().includes(filter.toLowerCase())
+        ));
       }
       setLoading(false);
     }, 500);
@@ -74,10 +72,10 @@ const Home: React.FC = () => {
 
   const loadMorePosts = () => {
     setPage((prevPage) => prevPage + 1);
-
+    
     // In a real app, we would fetch more posts from the backend
     // based on the page number
-
+    
     // For demo, we'll just simulate no more posts after a delay
     setTimeout(() => {
       setHasMore(false);
@@ -85,67 +83,75 @@ const Home: React.FC = () => {
   };
 
   return (
-    <HomeContainer>
-      <HeroSection>
-        <HeroContent>
-          <HeroTitle>Welcome to GamerVerse</HeroTitle>
-          <HeroSubtitle>
-            Connect with gamers. Share your experiences.
-          </HeroSubtitle>
-          <CreatePostButton to="/create-post">Create Post</CreatePostButton>
-        </HeroContent>
-      </HeroSection>
-
-      <FeedSection>
-        <FeedHeader>
-          <FeedTitle>Game Feed</FeedTitle>
-          <FilterBar
-            activeFilter={activeFilter}
-            onFilterChange={handleFilterChange}
-          />
-        </FeedHeader>
-
-        {loading ? (
-          <LoadingMessage>Loading posts...</LoadingMessage>
-        ) : posts.length === 0 ? (
-          <EmptyStateMessage>
-            No posts found. Be the first to{" "}
-            <Link to="/create-post">create a post</Link>!
-          </EmptyStateMessage>
-        ) : (
-          <>
-            <PostGrid>
-              {posts.map((post) => (
-                <PostCard key={post.id} post={post} />
-              ))}
-            </PostGrid>
-
-            {hasMore && (
-              <LoadMoreButton onClick={loadMorePosts}>Load More</LoadMoreButton>
-            )}
-          </>
-        )}
-      </FeedSection>
-    </HomeContainer>
+    <PageWrapper>
+      <HomeContainer>
+        <HeroSection>
+          <HeroContent>
+            <HeroTitle>Welcome to GamerVerse</HeroTitle>
+            <HeroSubtitle>Connect with gamers. Share your experiences.</HeroSubtitle>
+            <CreatePostButton to="/create-post">Create Post</CreatePostButton>
+          </HeroContent>
+        </HeroSection>
+        
+        <FeedSection>
+          <FeedHeader>
+            <FeedTitle>Game Feed</FeedTitle>
+            <FilterBar activeFilter={activeFilter} onFilterChange={handleFilterChange} />
+          </FeedHeader>
+          
+          {loading ? (
+            <LoadingMessage>Loading posts...</LoadingMessage>
+          ) : posts.length === 0 ? (
+            <EmptyStateMessage>
+              No posts found. Be the first to <Link to="/create-post">create a post</Link>!
+            </EmptyStateMessage>
+          ) : (
+            <>
+              <PostGrid>
+                {posts.map((post) => (
+                  <PostCard key={post.id} post={post} />
+                ))}
+              </PostGrid>
+              
+              {hasMore && (
+                <LoadMoreButton onClick={loadMorePosts}>
+                  Load More
+                </LoadMoreButton>
+              )}
+            </>
+          )}
+        </FeedSection>
+      </HomeContainer>
+    </PageWrapper>
   );
 };
+
+const PageWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  width: 100%;
+`;
 
 const HomeContainer = styled.div`
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: ${({ theme }) => theme.spacing.xl};
+  max-width: 1200px;
+  width: 100%;
+  padding: ${({ theme }) => theme.spacing.md};
 `;
 
 const HeroSection = styled.section`
-  background: linear-gradient(
-    135deg,
-    ${({ theme }) => theme.colors.primary},
+  background: linear-gradient(135deg, 
+    ${({ theme }) => theme.colors.primary}, 
     ${({ theme }) => theme.colors.secondary}
   );
   border-radius: ${({ theme }) => theme.borderRadius};
   padding: ${({ theme }) => theme.spacing.xl};
   margin-top: ${({ theme }) => theme.spacing.xl};
   box-shadow: ${({ theme }) => theme.colors.cardShadow};
+  width: 100%;
 `;
 
 const HeroContent = styled.div`
@@ -158,7 +164,7 @@ const HeroContent = styled.div`
 const HeroTitle = styled.h1`
   font-size: ${({ theme }) => theme.fontSizes.xxlarge};
   margin-bottom: ${({ theme }) => theme.spacing.md};
-
+  
   @media (max-width: 768px) {
     font-size: ${({ theme }) => theme.fontSizes.xlarge};
   }
@@ -168,7 +174,7 @@ const HeroSubtitle = styled.p`
   font-size: ${({ theme }) => theme.fontSizes.large};
   margin-bottom: ${({ theme }) => theme.spacing.lg};
   opacity: 0.9;
-
+  
   @media (max-width: 768px) {
     font-size: ${({ theme }) => theme.fontSizes.medium};
   }
@@ -184,7 +190,7 @@ const CreatePostButton = styled(Link)`
   font-size: ${({ theme }) => theme.fontSizes.medium};
   text-decoration: none;
   transition: ${({ theme }) => theme.transition};
-
+  
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -196,6 +202,7 @@ const FeedSection = styled.section`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing.lg};
+  width: 100%;
 `;
 
 const FeedHeader = styled.div`
@@ -204,7 +211,8 @@ const FeedHeader = styled.div`
   align-items: center;
   flex-wrap: wrap;
   gap: ${({ theme }) => theme.spacing.md};
-
+  width: 100%;
+  
   @media (max-width: 768px) {
     flex-direction: column;
     align-items: flex-start;
@@ -218,8 +226,9 @@ const FeedTitle = styled.h2`
 
 const PostGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: ${({ theme }) => theme.spacing.lg};
+  width: 100%;
 `;
 
 const LoadMoreButton = styled.button`
@@ -233,7 +242,7 @@ const LoadMoreButton = styled.button`
   transition: ${({ theme }) => theme.transition};
   margin: ${({ theme }) => theme.spacing.lg} auto;
   width: fit-content;
-
+  
   &:hover {
     background-color: ${({ theme }) => `${theme.colors.primary}10`};
   }
@@ -251,7 +260,7 @@ const EmptyStateMessage = styled.div`
   padding: ${({ theme }) => theme.spacing.xl};
   color: ${({ theme }) => theme.colors.textSecondary};
   font-size: ${({ theme }) => theme.fontSizes.medium};
-
+  
   a {
     color: ${({ theme }) => theme.colors.primary};
     font-weight: 600;

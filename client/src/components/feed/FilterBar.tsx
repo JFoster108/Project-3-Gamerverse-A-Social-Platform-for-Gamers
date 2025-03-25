@@ -37,7 +37,8 @@ const FilterBar: React.FC<FilterBarProps> = ({ activeFilter, onFilterChange }) =
 const FilterContainer = styled.div`
   width: 100%;
   overflow-x: auto;
-  padding-bottom: ${({ theme }) => theme.spacing.xs};
+  padding: ${({ theme }) => theme.spacing.sm} 0;
+  margin-bottom: ${({ theme }) => theme.spacing.md};
   
   &::-webkit-scrollbar {
     height: 4px;
@@ -71,13 +72,13 @@ interface FilterButtonProps {
 
 const FilterButton = styled.button<FilterButtonProps>`
   background-color: ${({ theme, isActive }) => 
-    isActive ? theme.colors.primary : 'transparent'};
+    isActive ? theme.colors.primary : theme.colors.surface};
   color: ${({ theme, isActive }) => 
     isActive ? theme.colors.buttonText : theme.colors.text};
   border: 1px solid ${({ theme, isActive }) => 
     isActive ? theme.colors.primary : theme.colors.border};
   border-radius: ${({ theme }) => theme.borderRadius};
-  padding: ${({ theme }) => `${theme.spacing.xs} ${theme.spacing.md}`};
+  padding: ${({ theme }) => `${theme.spacing.sm} ${theme.spacing.md}`};
   font-size: ${({ theme }) => theme.fontSizes.small};
   cursor: pointer;
   transition: ${({ theme }) => theme.transition};

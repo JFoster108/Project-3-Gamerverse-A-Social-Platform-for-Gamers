@@ -1,6 +1,6 @@
-import React from "react";
-import styled from "styled-components";
-import { Link } from "react-router-dom";
+import React from 'react';
+import styled from 'styled-components';
+import { Link } from 'react-router-dom';
 
 interface Game {
   id: string;
@@ -29,23 +29,13 @@ interface PostProps {
 }
 
 const PostCard: React.FC<PostProps> = ({ post }) => {
-  const {
-    id,
-    author,
-    content,
-    imageUrl,
-    game,
-    likes,
-    comments,
-    createdAt,
-    liked,
-  } = post;
-
+  const { id, author, content, imageUrl, game, likes, comments, createdAt, liked } = post;
+  
   // Format date
-  const formattedDate = new Date(createdAt).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
+  const formattedDate = new Date(createdAt).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
   });
 
   return (
@@ -54,9 +44,7 @@ const PostCard: React.FC<PostProps> = ({ post }) => {
         <UserInfo>
           <UserAvatar src={author.avatarUrl} alt={author.username} />
           <UserDetails>
-            <Username to={`/profile/${author.username}`}>
-              {author.username}
-            </Username>
+            <Username to={`/profile/${author.username}`}>{author.username}</Username>
             <PostDate>{formattedDate}</PostDate>
           </UserDetails>
         </UserInfo>
@@ -67,12 +55,12 @@ const PostCard: React.FC<PostProps> = ({ post }) => {
           </GameTag>
         )}
       </CardHeader>
-
+      
       <CardContent>
         <PostText>{content}</PostText>
         {imageUrl && <PostImage src={imageUrl} alt="Post content" />}
       </CardContent>
-
+      
       <CardFooter>
         <ActionButton liked={liked}>
           <span>👍</span> {likes}
@@ -91,7 +79,10 @@ const Card = styled.div`
   box-shadow: ${({ theme }) => theme.colors.cardShadow};
   overflow: hidden;
   transition: ${({ theme }) => theme.transition};
-
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  
   &:hover {
     transform: translateY(-4px);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
@@ -128,7 +119,7 @@ const Username = styled(Link)`
   font-weight: 600;
   color: ${({ theme }) => theme.colors.text};
   text-decoration: none;
-
+  
   &:hover {
     color: ${({ theme }) => theme.colors.primary};
     text-decoration: none;
@@ -163,6 +154,7 @@ const GameTitle = styled.span`
 
 const CardContent = styled.div`
   padding: ${({ theme }) => theme.spacing.md};
+  flex: 1;
 `;
 
 const PostText = styled.p`
@@ -192,18 +184,17 @@ const ActionButton = styled.button<ActionButtonProps>`
   gap: ${({ theme }) => theme.spacing.xs};
   background: none;
   border: none;
-  color: ${({ theme, liked }) =>
-    liked ? theme.colors.primary : theme.colors.text};
+  color: ${({ theme, liked }) => liked ? theme.colors.primary : theme.colors.text};
   font-size: ${({ theme }) => theme.fontSizes.medium};
   cursor: pointer;
   padding: ${({ theme }) => theme.spacing.xs} ${({ theme }) => theme.spacing.sm};
   border-radius: ${({ theme }) => theme.borderRadius};
   transition: ${({ theme }) => theme.transition};
-
+  
   &:hover {
     background-color: ${({ theme }) => `${theme.colors.primary}10`};
   }
-
+  
   span {
     font-size: 18px;
   }

@@ -53,15 +53,15 @@ const FooterContent = styled.div`
   display: flex;
   justify-content: space-between;
   max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
   padding: 0 ${({ theme }) => theme.spacing.md};
-
+  
   @media (max-width: 768px) {
     flex-direction: column;
     gap: ${({ theme }) => theme.spacing.lg};
   }
 `;
-
 const FooterSection = styled.div`
   display: flex;
   flex-direction: column;
