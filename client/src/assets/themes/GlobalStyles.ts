@@ -18,7 +18,10 @@ export const GlobalStyles = createGlobalStyle<{ theme: ThemeType }>`
     color: ${({ theme }) => theme.colors.text};
     transition: all 0.3s ease;
     line-height: 1.6;
+    width: 100%;
+    overflow-x: hidden;
   }
+
 
   a {
     color: ${({ theme }) => theme.colors.primary};
@@ -35,15 +38,15 @@ export const GlobalStyles = createGlobalStyle<{ theme: ThemeType }>`
   }
 
   .container {
-  max-width: 1200px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 0 ${({ theme }) => theme.spacing.md};
-  min-height: calc(100vh - 130px);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 ${({ theme }) => theme.spacing.md};
+    min-height: calc(100vh - 130px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
 
   .section {
     margin: ${({ theme }) => theme.spacing.xl} 0;

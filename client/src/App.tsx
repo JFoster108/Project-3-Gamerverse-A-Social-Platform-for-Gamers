@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
+import styled from 'styled-components';
 import { AuthProvider } from './context/AuthContext';
 import { darkTheme, lightTheme } from './assets/themes/themes';
 import { GlobalStyles } from './assets/themes/GlobalStyles';
@@ -28,44 +29,70 @@ function App() {
     setTheme(theme === 'light' ? 'dark' : 'light');
   };
 
+  const themeObject = theme === 'light' ? lightTheme : darkTheme;
+
   return (
     <AuthProvider>
-      <ThemeProvider theme={theme === 'light' ? lightTheme : darkTheme}>
+      <ThemeProvider theme={themeObject}>
         <GlobalStyles />
         <Router>
-          <Header toggleTheme={toggleTheme} currentTheme={theme} />
-          <main className="container">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/profile/:username" element={<Profile />} />
-              <Route path="/request-password-reset" element={<RequestPasswordReset />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              <Route 
-                path="/profile/edit" 
-                element={
-                  <ProtectedRoute>
-                    <EditProfile />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/create-post" 
-                element={
-                  <ProtectedRoute>
-                    <CreatePost />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </main>
-          <Footer />
+          <AppContainer>
+            <Header toggleTheme={toggleTheme} currentTheme={theme} />
+            <MainContent>
+              <ContentContainer>
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/signup" element={<Signup />} />
+                  <Route path="/profile/:username" element={<Profile />} />
+                  <Route path="/request-password-reset" element={<RequestPasswordReset />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
+                  <Route 
+                    path="/profile/edit" 
+                    element={
+                      <ProtectedRoute>
+                        <EditProfile />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/create-post" 
+                    element={
+                      <ProtectedRoute>
+                        <CreatePost />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </ContentContainer>
+            </MainContent>
+            <Footer />
+          </AppContainer>
         </Router>
       </ThemeProvider>
     </AuthProvider>
   );
 }
+
+const AppContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+`;
+
+const MainContent = styled.main`
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+`;
+
+const ContentContainer = styled.div`
+  max-width: 1200px;
+  width: 100%;
+  padding: 0 ${({ theme }) => theme.spacing.md};
+`;
 
 export default App;
