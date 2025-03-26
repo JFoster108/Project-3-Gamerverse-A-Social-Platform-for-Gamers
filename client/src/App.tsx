@@ -1,3 +1,4 @@
+// src/App.tsx
 import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
@@ -21,6 +22,12 @@ import CreatePost from './pages/CreatePost';
 import NotFound from './pages/NotFound';
 import RequestPasswordReset from './pages/RequestPasswordReset';
 import ResetPassword from './pages/ResetPassword';
+
+// Admin Components
+import AdminRoutes from './components/admin/AdminRoutes';
+
+// Game Library
+import GameLibrary from './components/GameLibrary/GameLibrary';
 
 function App() {
   const [theme, setTheme] = useState('dark');
@@ -60,6 +67,22 @@ function App() {
                     element={
                       <ProtectedRoute>
                         <CreatePost />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/game-library" 
+                    element={
+                      <ProtectedRoute>
+                        <GameLibrary />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/admin/*" 
+                    element={
+                      <ProtectedRoute>
+                        <AdminRoutes />
                       </ProtectedRoute>
                     } 
                   />
