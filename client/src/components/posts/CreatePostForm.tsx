@@ -1,276 +1,183 @@
-// src/components/Post/CreatePostForm.tsx
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import GameSearchBar from "../GameLibrary/GameSearchBar";
+import { usePosts } from "../context/PostsContext";
 
-const FormContainer = styled.div`
-  background-color: ${({ theme }) => theme.cardBackground};
-  border-radius: 10px;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+const CreatePost: React.FC = () => {
+  const { createPost } = usePosts();
+  const navigate = useNavigate();
+  
+  const [content, setContent] = useState("");
+  const [gameTitle, setGameTitle] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!content.trim()) return;
+    
+    setLoading(true);
+    
+    try {
+      // Create the post
+      createPost(content, gameTitle || undefined, imageUrl || undefined);
+      
+      // Navigate back to home
+      navigate("/");
+    } catch (error) {
+      console.error("Error creating post:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Container>
+      <Title>Create Post</Title>
+      <Subtitle>Share your gaming experiences</Subtitle>
+
+      <Form onSubmit={handleSubmit}>
+        <FormGroup>
+          <Label>What's on your mind?</Label>
+          <TextArea
+            placeholder="Write something about your gaming experience..."
+            rows={5}
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            required
+          />
+        </FormGroup>
+
+        <FormGroup>
+          <Label>Add a game (optional)</Label>
+          <Input 
+            type="text" 
+            placeholder="Game title"
+            value={gameTitle}
+            onChange={(e) => setGameTitle(e.target.value)}
+          />
+        </FormGroup>
+
+        <FormGroup>
+          <Label>Add an image URL (optional)</Label>
+          <Input 
+            type="text" 
+            placeholder="Image URL"
+            value={imageUrl}
+            onChange={(e) => setImageUrl(e.target.value)}
+          />
+          <HelpText>Enter a URL to an image on the web</HelpText>
+        </FormGroup>
+
+        <ButtonContainer>
+          <CancelButton type="button" onClick={() => navigate("/")}>
+            Cancel
+          </CancelButton>
+          <Button type="submit" disabled={!content.trim() || loading}>
+            {loading ? "Posting..." : "Post"}
+          </Button>
+        </ButtonContainer>
+      </Form>
+    </Container>
+  );
+};
+
+const Container = styled.div`
+  max-width: 800px;
+  margin: 0 auto;
+  padding: ${({ theme }) => theme.spacing.lg};
+`;
+
+const Title = styled.h1`
+  font-size: ${({ theme }) => theme.fontSizes.xxlarge};
+  margin-bottom: ${({ theme }) => theme.spacing.xs};
+`;
+
+const Subtitle = styled.p`
+  font-size: ${({ theme }) => theme.fontSizes.large};
+  color: ${({ theme }) => theme.colors.textSecondary};
+  margin-bottom: ${({ theme }) => theme.spacing.xl};
+`;
+
+const Form = styled.form`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.lg};
+`;
+
+const FormGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.xs};
+`;
+
+const Label = styled.label`
+  font-size: ${({ theme }) => theme.fontSizes.medium};
+  font-weight: 500;
 `;
 
 const TextArea = styled.textarea`
-  width: 100%;
-  min-height: 120px;
-  border: 1px solid ${({ theme }) => theme.borderColor};
-  border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  background-color: ${({ theme }) => theme.inputBackground};
-  color: ${({ theme }) => theme.textColor};
-  font-family: inherit;
-  font-size: 1rem;
+  padding: ${({ theme }) => theme.spacing.md};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.borderRadius};
+  background-color: ${({ theme }) => theme.colors.surface};
+  color: ${({ theme }) => theme.colors.text};
   resize: vertical;
-
-  &:focus {
-    outline: none;
-    border-color: ${({ theme }) => theme.primaryColor};
-    box-shadow: 0 0 0 2px ${({ theme }) => theme.primaryColorLight};
-  }
+  min-height: 120px;
+  font-family: inherit;
 `;
 
-const OptionsBar = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
+const Input = styled.input`
+  padding: ${({ theme }) => theme.spacing.md};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.borderRadius};
+  background-color: ${({ theme }) => theme.colors.surface};
+  color: ${({ theme }) => theme.colors.text};
 `;
 
-const GameTagContainer = styled.div`
-  display: flex;
-  align-items: center;
-  flex: 1;
-`;
-
-const GameTag = styled.div`
-  display: flex;
-  align-items: center;
-  background-color: ${({ theme }) => theme.tagBackground};
-  color: ${({ theme }) => theme.tagText};
-  padding: 0.5rem 0.75rem;
-  border-radius: 4px;
-  margin-left: 1rem;
-  font-size: 0.9rem;
-`;
-
-const GameIcon = styled.img`
-  width: 20px;
-  height: 20px;
-  border-radius: 4px;
-  margin-right: 0.5rem;
-`;
-
-const RemoveButton = styled.button`
-  background: none;
-  border: none;
-  color: ${({ theme }) => theme.textColorSecondary};
-  margin-left: 0.5rem;
-  cursor: pointer;
-
-  &:hover {
-    color: ${({ theme }) => theme.dangerColor};
-  }
+const HelpText = styled.small`
+  color: ${({ theme }) => theme.colors.textSecondary};
+  font-size: ${({ theme }) => theme.fontSizes.small};
 `;
 
 const ButtonContainer = styled.div`
   display: flex;
   justify-content: flex-end;
-  gap: 1rem;
+  gap: ${({ theme }) => theme.spacing.md};
 `;
 
 const Button = styled.button`
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
+  padding: ${({ theme }) => theme.spacing.md};
+  background-color: ${({ theme }) => theme.colors.primary};
+  color: ${({ theme }) => theme.colors.buttonText};
   border: none;
+  border-radius: ${({ theme }) => theme.borderRadius};
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-`;
-
-const CancelButton = styled(Button)`
-  background-color: ${({ theme }) => theme.buttonBackground};
-  color: ${({ theme }) => theme.buttonText};
-
-  &:hover {
-    background-color: ${({ theme }) => theme.buttonBackgroundHover};
+  
+  &:hover:not(:disabled) {
+    opacity: 0.9;
   }
-`;
-
-const PostButton = styled(Button)`
-  background-color: ${({ theme }) => theme.primaryColor};
-  color: white;
-
-  &:hover {
-    background-color: ${({ theme }) => theme.primaryColorDark};
-  }
-
+  
   &:disabled {
-    background-color: ${({ theme }) => theme.disabledColor};
+    opacity: 0.7;
     cursor: not-allowed;
   }
 `;
 
-const SearchGameContainer = styled.div`
-  margin-bottom: 1rem;
+const CancelButton = styled.button`
+  padding: ${({ theme }) => theme.spacing.md};
+  background-color: transparent;
+  color: ${({ theme }) => theme.colors.text};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.borderRadius};
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.background};
+  }
 `;
 
-interface Game {
-  id: number;
-  name: string;
-  background_image: string;
-}
-
-const CreatePostForm: React.FC = () => {
-  const [content, setContent] = useState("");
-  const [selectedGame, setSelectedGame] = useState<Game | null>(null);
-  const [isSearchingGame, setIsSearchingGame] = useState(false);
-  const [gameSearchQuery, setGameSearchQuery] = useState("");
-  const [gameSearchResults, setGameSearchResults] = useState<Game[]>([]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!content.trim()) return;
-
-    // In a real app, you would send this data to your API
-    console.log({
-      content,
-      gameId: selectedGame?.id,
-      gameName: selectedGame?.name,
-    });
-
-    // Reset form
-    setContent("");
-    setSelectedGame(null);
-  };
-
-  const searchGames = async (query: string) => {
-    if (!query) {
-      setGameSearchResults([]);
-      return;
-    }
-
-    // In a real app, you would call your API or the RAWG API
-    // Mock data for demonstration
-    setGameSearchResults([
-      {
-        id: 1,
-        name: "The Witcher 3",
-        background_image: "https://via.placeholder.com/60",
-      },
-      {
-        id: 2,
-        name: "Elden Ring",
-        background_image: "https://via.placeholder.com/60",
-      },
-    ]);
-  };
-
-  const handleGameSearch = (query: string) => {
-    setGameSearchQuery(query);
-    searchGames(query);
-  };
-
-  const selectGame = (game: Game) => {
-    setSelectedGame(game);
-    setIsSearchingGame(false);
-    setGameSearchQuery("");
-    setGameSearchResults([]);
-  };
-
-  return (
-    <FormContainer>
-      <TextArea
-        placeholder="What's on your mind?"
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-      />
-
-      <OptionsBar>
-        <button
-          onClick={() => setIsSearchingGame(!isSearchingGame)}
-          style={{
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            color: "#666",
-          }}
-        >
-          🎮 Tag a game
-        </button>
-
-        <GameTagContainer>
-          {selectedGame && (
-            <GameTag>
-              <GameIcon
-                src={selectedGame.background_image}
-                alt={selectedGame.name}
-              />
-              {selectedGame.name}
-              <RemoveButton onClick={() => setSelectedGame(null)}>
-                ×
-              </RemoveButton>
-            </GameTag>
-          )}
-        </GameTagContainer>
-      </OptionsBar>
-
-      {isSearchingGame && (
-        <SearchGameContainer>
-          <GameSearchBar
-            searchQuery={gameSearchQuery}
-            setSearchQuery={handleGameSearch}
-          />
-
-          {gameSearchResults.length > 0 && (
-            <div style={{ marginTop: "0.5rem" }}>
-              {gameSearchResults.map((game) => (
-                <div
-                  key={game.id}
-                  style={{
-                    padding: "0.5rem",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    borderRadius: "4px",
-                  }}
-                  onClick={() => selectGame(game)}
-                >
-                  <img
-                    src={game.background_image}
-                    alt={game.name}
-                    style={{
-                      width: "30px",
-                      height: "30px",
-                      marginRight: "0.5rem",
-                      borderRadius: "4px",
-                    }}
-                  />
-                  {game.name}
-                </div>
-              ))}
-            </div>
-          )}
-        </SearchGameContainer>
-      )}
-
-      <ButtonContainer>
-        <CancelButton
-          onClick={() => {
-            setContent("");
-            setSelectedGame(null);
-          }}
-        >
-          Cancel
-        </CancelButton>
-        <PostButton onClick={handleSubmit} disabled={!content.trim()}>
-          Post
-        </PostButton>
-      </ButtonContainer>
-    </FormContainer>
-  );
-};
-
-export default CreatePostForm;
+export default CreatePost;

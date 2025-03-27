@@ -20,7 +20,7 @@ const Signup: React.FC = () => {
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
-  const { login } = useAuth();
+  const { signup, login } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,28 +55,19 @@ const Signup: React.FC = () => {
 
     setLoading(true);
 
-    // This would normally be a fetch or GraphQL call to your backend
     try {
-      // Mocking a successful signup for frontend development
-      // Your backend team will integrate this with the actual API
-
-      // Simulate API call
-      setTimeout(() => {
-        // Mock token - this would come from your backend API
-        const mockToken =
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEyMyIsInVzZXJuYW1lIjoidGVzdHVzZXIiLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJleHAiOjE5MTYyMzkwMjJ9.oB3MmYKw8e1VR6Uwt-9q0LVwuWU-c842s9gqGN-G_FU";
-
-        // Store the token
-        login(mockToken);
-
-        // Redirect to home page
-        navigate("/");
-
-        setLoading(false);
-      }, 1000);
+      // Use the signup function from AuthContext to get a token
+      const token = await signup(formData.username, formData.email, formData.password);
+      
+      // Log in with the token
+      login(token);
+      
+      // Navigate to home
+      navigate('/');
     } catch (err) {
       console.error("Signup error:", err);
       setError("Error creating account. Please try again.");
+    } finally {
       setLoading(false);
     }
   };

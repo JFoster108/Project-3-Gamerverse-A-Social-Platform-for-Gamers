@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
 import styled from 'styled-components';
 import { AuthProvider } from './context/AuthContext';
+import { PostsProvider } from './context/PostsContext';
 import { darkTheme, lightTheme } from './assets/themes/themes';
 import { GlobalStyles } from './assets/themes/GlobalStyles';
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -40,60 +41,62 @@ function App() {
 
   return (
     <AuthProvider>
-      <ThemeProvider theme={themeObject}>
-        <GlobalStyles />
-        <Router>
-          <AppContainer>
-            <Header toggleTheme={toggleTheme} currentTheme={theme} />
-            <MainContent>
-              <ContentContainer>
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/signup" element={<Signup />} />
-                  <Route path="/profile/:username" element={<Profile />} />
-                  <Route path="/request-password-reset" element={<RequestPasswordReset />} />
-                  <Route path="/reset-password" element={<ResetPassword />} />
-                  <Route 
-                    path="/profile/edit" 
-                    element={
-                      <ProtectedRoute>
-                        <EditProfile />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/create-post" 
-                    element={
-                      <ProtectedRoute>
-                        <CreatePost />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/game-library" 
-                    element={
-                      <ProtectedRoute>
-                        <GameLibrary />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/admin/*" 
-                    element={
-                      <ProtectedRoute>
-                        <AdminRoutes />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </ContentContainer>
-            </MainContent>
-            <Footer />
-          </AppContainer>
-        </Router>
-      </ThemeProvider>
+      <PostsProvider>
+        <ThemeProvider theme={themeObject}>
+          <GlobalStyles />
+          <Router>
+            <AppContainer>
+              <Header toggleTheme={toggleTheme} currentTheme={theme} />
+              <MainContent>
+                <ContentContainer>
+                  <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/signup" element={<Signup />} />
+                    <Route path="/profile/:username" element={<Profile />} />
+                    <Route path="/request-password-reset" element={<RequestPasswordReset />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
+                    <Route 
+                      path="/profile/edit" 
+                      element={
+                        <ProtectedRoute>
+                          <EditProfile />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/create-post" 
+                      element={
+                        <ProtectedRoute>
+                          <CreatePost />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/game-library" 
+                      element={
+                        <ProtectedRoute>
+                          <GameLibrary />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/admin/*" 
+                      element={
+                        <ProtectedRoute>
+                          <AdminRoutes />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </ContentContainer>
+              </MainContent>
+              <Footer />
+            </AppContainer>
+          </Router>
+        </ThemeProvider>
+      </PostsProvider>
     </AuthProvider>
   );
 }

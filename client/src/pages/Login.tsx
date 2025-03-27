@@ -32,28 +32,26 @@ const Login: React.FC = () => {
         setError("");
         setLoading(true);
 
-        // This would normally be a fetch or GraphQL call to your backend
         try {
-            // Mocking a successful login for frontend development
-            // Your backend team will integrate this with the actual API
+            // For demo purposes, create a mock token
+            const mockToken = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.${btoa(
+                JSON.stringify({
+                    id: "user-1",
+                    username: formData.email.split('@')[0],
+                    email: formData.email,
+                    exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7 // 1 week
+                })
+            )}.DUMMY_SIGNATURE`;
 
-            // Simulate API call
-            setTimeout(() => {
-                // Mock token - this would come from your backend API
-                const mockToken =
-                    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEyMyIsInVzZXJuYW1lIjoidGVzdHVzZXIiLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJleHAiOjE5MTYyMzkwMjJ9.oB3MmYKw8e1VR6Uwt-9q0LVwuWU-c842s9gqGN-G_FU";
+            // Store the token
+            login(mockToken);
 
-                // Store the token
-                login(mockToken);
-
-                // Redirect to home page
-                navigate("/");
-
-                setLoading(false);
-            }, 1000);
+            // Redirect to home page
+            navigate("/");
         } catch (err) {
             console.error("Login error:", err);
             setError("Invalid email or password. Please try again.");
+        } finally {
             setLoading(false);
         }
     };
@@ -95,7 +93,7 @@ const Login: React.FC = () => {
                         />
                     </FormGroup>
 
-                    <ForgotPassword to="/forgot-password">
+                    <ForgotPassword to="/request-password-reset">
                         Forgot password?
                     </ForgotPassword>
 

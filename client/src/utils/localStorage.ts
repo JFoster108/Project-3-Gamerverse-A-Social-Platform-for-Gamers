@@ -1,17 +1,26 @@
 import React from "react";
 import styled from "styled-components";
 import { useParams, Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { getUserWithImage, getCurrentUserWithImage } from "../utils/localStorage";
 
 const Profile = () => {
   const { username } = useParams<{ username: string }>();
-  const { user } = useAuth();
+  const currentUser = getCurrentUserWithImage();
+  
+  // Find the user being viewed
+  const allUsers = JSON.parse(localStorage.getItem("users") || "[]");
+  const viewedUserBasic = allUsers.find((u: any) => u.username === username);
+  
+  // If found, get the full user with image
+  const viewedUser = viewedUserBasic 
+    ? getUserWithImage(viewedUserBasic.id) 
+    : null;
   
   // Determine if this is the current user's profile
-  const isCurrentUser = user?.username === username;
+  const isCurrentUser = currentUser?.id === viewedUser?.id;
 
-  // Use actual user data if it's the current user, otherwise use mock data
-  const userData = isCurrentUser ? user : {
+  // Use actual user data if found, otherwise use mock data
+  const userData = viewedUser || {
     username: username || "gamer123",
     avatarUrl: "https://via.placeholder.com/150",
     bio: "Passionate gamer since the NES days. I love RPGs, adventure games, and the occasional FPS.",

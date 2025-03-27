@@ -1,90 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import PostCard from '../components/posts/PostCard';
 import FilterBar from '../components/feed/FilterBar';
 import { useAuth } from '../context/AuthContext';
-
-// This will be replaced with actual data from the backend
-import { mockPosts } from '../utils/mockData';
-
-interface Post {
-  id: string;
-  author: {
-    id: string;
-    username: string;
-    avatarUrl: string;
-  };
-  content: string;
-  imageUrl?: string;
-  game?: {
-    id: string;
-    title: string;
-    imageUrl: string;
-  };
-  likes: number;
-  comments: number;
-  createdAt: string;
-  liked?: boolean;
-}
+import { usePosts } from '../context/PostsContext';
 
 const Home: React.FC = () => {
   const { isAuthenticated } = useAuth();
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [page, setPage] = useState<number>(1);
-  const [hasMore, setHasMore] = useState<boolean>(true);
+  const { posts, loading } = usePosts();
   const [activeFilter, setActiveFilter] = useState<string>('all');
-
-  useEffect(() => {
-    // Only fetch posts if user is authenticated
-    if (isAuthenticated) {
-      fetchPosts();
-    }
-  }, [isAuthenticated]);
-
-  const fetchPosts = () => {
-    setLoading(true);
-    
-    // Simulating API call with a delay
-    setTimeout(() => {
-      setPosts(mockPosts);
-      setLoading(false);
-      setHasMore(false); // For mock data, we'll pretend there's no more data
-    }, 800);
-  };
 
   const handleFilterChange = (filter: string) => {
     setActiveFilter(filter);
-    setLoading(true);
-    
-    // Simulate API call for filtered data
-    setTimeout(() => {
-      // In a real app, we would fetch filtered data from the backend
-      if (filter === 'all') {
-        setPosts(mockPosts);
-      } else {
-        // Filter posts based on game console or category
-        // This is just for demo purposes
-        setPosts(mockPosts.filter((post) => 
-          post.game?.title.toLowerCase().includes(filter.toLowerCase())
-        ));
-      }
-      setLoading(false);
-    }, 500);
   };
 
-  const loadMorePosts = () => {
-    setPage((prevPage) => prevPage + 1);
-    
-    // In a real app, we would fetch more posts from the backend
-    // based on the page number
-    
-    // For demo, we'll just simulate no more posts after a delay
-    setTimeout(() => {
-      setHasMore(false);
-    }, 500);
-  };
+  // Filter posts by the active filter
+  const filteredPosts = activeFilter === 'all' 
+    ? posts 
+    : posts.filter((post) => post.game?.title.toLowerCase().includes(activeFilter.toLowerCase()));
 
   // Show welcome page for non-authenticated users
   if (!isAuthenticated) {
@@ -124,24 +58,16 @@ const Home: React.FC = () => {
         
         {loading ? (
           <LoadingMessage>Loading posts...</LoadingMessage>
-        ) : posts.length === 0 ? (
+        ) : filteredPosts.length === 0 ? (
           <EmptyStateMessage>
             No posts found. Be the first to <Link to="/create-post">create a post</Link>!
           </EmptyStateMessage>
         ) : (
-          <>
-            <PostGrid>
-              {posts.map((post) => (
-                <PostCard key={post.id} post={post} />
-              ))}
-            </PostGrid>
-            
-            {hasMore && (
-              <LoadMoreButton onClick={loadMorePosts}>
-                Load More
-              </LoadMoreButton>
-            )}
-          </>
+          <PostGrid>
+            {filteredPosts.map((post) => (
+              <PostCard key={post.id} post={post} />
+            ))}
+          </PostGrid>
         )}
       </FeedSection>
     </HomeContainer>
@@ -243,19 +169,6 @@ const PostGrid = styled.div`
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: ${({ theme }) => theme.spacing.lg};
   width: 100%;
-`;
-
-const LoadMoreButton = styled.button`
-  background-color: transparent;
-  border: 2px solid ${({ theme }) => theme.colors.primary};
-  color: ${({ theme }) => theme.colors.primary};
-  padding: ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.lg};
-  border-radius: ${({ theme }) => theme.borderRadius};
-  font-weight: 600;
-  cursor: pointer;
-  transition: ${({ theme }) => theme.transition};
-  margin: ${({ theme }) => theme.spacing.lg} auto;
-  width: fit-content;
 `;
 
 const LoadingMessage = styled.div`

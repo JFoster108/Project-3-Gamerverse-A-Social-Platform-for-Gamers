@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
+import { usePosts } from '../../context/PostsContext';
 
 interface Game {
   id: string;
@@ -30,6 +31,7 @@ interface PostProps {
 
 const PostCard: React.FC<PostProps> = ({ post }) => {
   const { id, author, content, imageUrl, game, likes, comments, createdAt, liked } = post;
+  const { likePost } = usePosts();
   
   // Format date
   const formattedDate = new Date(createdAt).toLocaleDateString('en-US', {
@@ -37,6 +39,10 @@ const PostCard: React.FC<PostProps> = ({ post }) => {
     month: 'short',
     day: 'numeric',
   });
+
+  const handleLike = () => {
+    likePost(id);
+  };
 
   return (
     <Card>
@@ -62,7 +68,7 @@ const PostCard: React.FC<PostProps> = ({ post }) => {
       </CardContent>
       
       <CardFooter>
-        <ActionButton liked={liked}>
+        <ActionButton liked={liked} onClick={handleLike}>
           <span>👍</span> {likes}
         </ActionButton>
         <ActionButton>
