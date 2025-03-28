@@ -77,7 +77,9 @@ const typeDefs = gql`
     deletePost(id: ID!): String
     likePost(id: ID!): Post
     unlikePost(id: ID!): Post
+    flagPost(postId: ID!, reason: String!): String
     # Future: submitReport, submitAppeal, moderation actions, createReview can be added here
+    approveAppeal(appealId: ID!, resolution: String!): String
   }
 
   extend type Query {
