@@ -1,3 +1,4 @@
+// src/pages/Profile.tsx
 import React from "react";
 import styled from "styled-components";
 import { useParams, Link } from "react-router-dom";
@@ -120,7 +121,12 @@ const Profile = () => {
       <SectionDivider />
 
       <GameCollection>
-        <SectionTitle>Game Collection</SectionTitle>
+        <SectionHeader>
+          <SectionTitle>Game Collection</SectionTitle>
+          {isCurrentUser && (
+            <BrowseGamesButton to="/game-library">Browse Games</BrowseGamesButton>
+          )}
+        </SectionHeader>
         <GamesGrid>
           {gameCollection.map((game) => (
             <GameCard key={game.id}>
@@ -272,9 +278,35 @@ const SectionDivider = styled.hr`
   margin: ${({ theme }) => theme.spacing.lg} 0;
 `;
 
+const SectionHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: ${({ theme }) => theme.spacing.md};
+`;
+
 const SectionTitle = styled.h2`
   font-size: ${({ theme }) => theme.fontSizes.large};
   margin-bottom: ${({ theme }) => theme.spacing.md};
+`;
+
+const BrowseGamesButton = styled(Link)`
+  background-color: ${({ theme }) => theme.colors.primary};
+  color: ${({ theme }) => theme.colors.buttonText};
+  border: none;
+  padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.md};
+  border-radius: ${({ theme }) => theme.borderRadius};
+  font-weight: 600;
+  font-size: ${({ theme }) => theme.fontSizes.small};
+  text-decoration: none;
+  display: inline-block;
+  transition: ${({ theme }) => theme.transition};
+
+  &:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    text-decoration: none;
+  }
 `;
 
 const GamingProfiles = styled.div``;

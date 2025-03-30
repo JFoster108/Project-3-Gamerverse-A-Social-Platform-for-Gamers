@@ -1,3 +1,4 @@
+// src/components/layout/Header.tsx
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -65,6 +66,12 @@ const Header: React.FC<HeaderProps> = ({ toggleTheme, currentTheme }) => {
                   >
                     My Profile
                   </DropdownItem>
+                  <DropdownItem 
+                    to="/game-library" 
+                    onClick={() => setDropdownOpen(false)}
+                  >
+                    Game Library
+                  </DropdownItem>
                   <DropdownItemButton 
                     onClick={() => {
                       setDropdownOpen(false);
@@ -95,6 +102,7 @@ const Header: React.FC<HeaderProps> = ({ toggleTheme, currentTheme }) => {
             <>
               <NavLink to="/create-post">Create Post</NavLink>
               <NavLink to={`/profile/${user?.username}`}>My Profile</NavLink>
+              <NavLink to="/game-library">Game Library</NavLink>
             </>
           )}
         </NavLinks>

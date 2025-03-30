@@ -1,7 +1,8 @@
 // src/components/GameLibrary/GameSearchBar.tsx
+// src/components/GameLibrary/GameSearchBar.tsx
 import React from "react";
 import styled from "styled-components";
-
+// Rest of imports...
 const SearchContainer = styled.div`
   position: relative;
   width: 100%;
@@ -11,16 +12,16 @@ const SearchContainer = styled.div`
 const SearchInput = styled.input`
   width: 100%;
   padding: 0.75rem 2.5rem 0.75rem 1rem;
-  border: 1px solid ${({ theme }) => theme.borderColor};
+  border: 1px solid #ccc;
   border-radius: 8px;
-  background-color: ${({ theme }) => theme.inputBackground};
-  color: ${({ theme }) => theme.textColor};
+  background-color: white;
+  color: #333;
   font-size: 0.9rem;
 
   &:focus {
     outline: none;
-    border-color: ${({ theme }) => theme.primaryColor};
-    box-shadow: 0 0 0 2px ${({ theme }) => theme.primaryColorLight};
+    border-color: #7289da;
+    box-shadow: 0 0 0 2px rgba(114, 137, 218, 0.2);
   }
 `;
 
@@ -29,7 +30,7 @@ const SearchIcon = styled.div`
   right: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: ${({ theme }) => theme.textColorSecondary};
+  color: #999;
 `;
 
 interface GameSearchBarProps {

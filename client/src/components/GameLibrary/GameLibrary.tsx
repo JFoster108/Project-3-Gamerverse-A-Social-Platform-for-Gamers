@@ -3,10 +3,18 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import GameSearchBar from "./GameSearchBar";
 import GameCard from "./GameCard";
-import axios from "axios";
+import { 
+  searchGames, 
+  getPopularGames, 
+  getNewReleases, 
+  Game as APIGame
+} from "../../services/rawgApi";
 
 const Container = styled.div`
   margin-bottom: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 ${({ theme }) => theme.spacing.md};
 `;
 
 const Header = styled.div`
@@ -14,11 +22,19 @@ const Header = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 `;
 
 const Title = styled.h2`
   margin: 0;
-  color: ${({ theme }) => theme.textColor};
+  color: ${({ theme }) => theme.colors.text};
+  font-size: ${({ theme }) => theme.fontSizes.xlarge};
 `;
 
 const FilterContainer = styled.div`
@@ -30,76 +46,66 @@ const FilterContainer = styled.div`
 
 const FilterButton = styled.button<{ active: boolean }>`
   background-color: ${(props) =>
-    props.active ? props.theme.primaryColor : props.theme.buttonBackground};
-  color: ${(props) => (props.active ? "white" : props.theme.buttonText)};
+    props.active ? props.theme.colors.primary : props.theme.colors.buttonBackground};
+  color: ${(props) => (props.active ? props.theme.colors.buttonText : props.theme.colors.text)};
   border: none;
-  border-radius: 4px;
-  padding: 0.5rem 1rem;
+  border-radius: ${({ theme }) => theme.borderRadius};
+  padding: ${({ theme }) => `${theme.spacing.xs} ${theme.spacing.md}`};
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: ${({ theme }) => theme.transition};
 
   &:hover {
     background-color: ${(props) =>
       props.active
-        ? props.theme.primaryColorDark
-        : props.theme.buttonBackgroundHover};
+        ? props.theme.colors.secondary
+        : props.theme.colors.buttonBackgroundHover};
   }
 `;
 
 const GamesGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 1.5rem;
 `;
 
 const LoadingSpinner = styled.div`
   text-align: center;
   padding: 2rem;
-  color: ${({ theme }) => theme.textColor};
+  color: ${({ theme }) => theme.colors.text};
+  font-size: ${({ theme }) => theme.fontSizes.large};
 `;
 
 const NoGames = styled.div`
   text-align: center;
   padding: 3rem;
-  color: ${({ theme }) => theme.textColorSecondary};
+  color: ${({ theme }) => theme.colors.textSecondary};
+  font-size: ${({ theme }) => theme.fontSizes.medium};
 `;
 
 const LoadMoreButton = styled.button`
-  background-color: ${({ theme }) => theme.buttonBackground};
-  color: ${({ theme }) => theme.buttonText};
+  background-color: ${({ theme }) => theme.colors.primary};
+  color: ${({ theme }) => theme.colors.buttonText};
   border: none;
-  border-radius: 4px;
-  padding: 0.75rem 1.5rem;
+  border-radius: ${({ theme }) => theme.borderRadius};
+  padding: ${({ theme }) => `${theme.spacing.sm} ${theme.spacing.lg}`};
   margin: 2rem auto;
   display: block;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: ${({ theme }) => theme.transition};
+  font-weight: 600;
 
   &:hover {
-    background-color: ${({ theme }) => theme.buttonBackgroundHover};
+    background-color: ${({ theme }) => theme.colors.secondary};
+    transform: translateY(-2px);
   }
 `;
 
 // Define the game status types
 type GameStatus = "playing" | "completed" | "backlog" | "all";
+type ViewType = "all" | "library" | "popular" | "new";
 
-// Game type from RAWG API
-interface Game {
-  id: number;
-  name: string;
-  background_image: string;
-  released: string;
-  metacritic: number;
-  platforms: Array<{
-    platform: {
-      id: number;
-      name: string;
-    };
-  }>;
-  genres: Array<{
-    id: number;
-    name: string;
-  }>;
+// Game type with additional user data
+interface Game extends APIGame {
   status?: GameStatus;
   lastPlayed?: string | null;
 }
@@ -115,36 +121,33 @@ const GameLibrary: React.FC = () => {
   const [games, setGames] = useState<Game[]>([]);
   const [userLibrary, setUserLibrary] = useState<LibraryGame[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filter, setFilter] = useState<GameStatus>("all");
+  const [statusFilter, setStatusFilter] = useState<GameStatus>("all");
+  const [viewType, setViewType] = useState<ViewType>("popular");
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
-  // RAWG API key - In production, this should be stored in environment variables
-  const API_KEY = "your_rawg_api_key"; // Replace with your actual key
-
-  // Fetch games from RAWG API
-  const fetchGames = async (query: string, pageNum: number) => {
-    if (!query) return;
-
+  // Fetch games from API
+  const fetchGamesData = async (view: ViewType, pageNum: number, query = "") => {
     setLoading(true);
     try {
-      const response = await axios.get(`https://api.rawg.io/api/games`, {
-        params: {
-          key: API_KEY,
-          search: query,
-          page: pageNum,
-          page_size: 12,
-        },
-      });
-
-      if (pageNum === 1) {
-        setGames(response.data.results);
+      let response;
+      
+      if (query) {
+        response = await searchGames(query, pageNum);
+      } else if (view === "new") {
+        response = await getNewReleases(pageNum);
       } else {
-        setGames((prevGames) => [...prevGames, ...response.data.results]);
+        response = await getPopularGames(pageNum);
       }
 
-      setHasMore(!!response.data.next);
+      if (pageNum === 1) {
+        setGames(response.results);
+      } else {
+        setGames((prevGames) => [...prevGames, ...response.results]);
+      }
+
+      setHasMore(!!response.next);
     } catch (error) {
       console.error("Error fetching games:", error);
     } finally {
@@ -152,7 +155,12 @@ const GameLibrary: React.FC = () => {
     }
   };
 
-  // Fetch user's library - mock data for now
+  // Load initial games
+  useEffect(() => {
+    fetchGamesData("popular", 1);
+  }, []);
+
+  // Mock user library data - in a real app this would come from your backend
   useEffect(() => {
     // This would normally be an API call to get the user's library
     setUserLibrary([
@@ -162,7 +170,7 @@ const GameLibrary: React.FC = () => {
     ]);
   }, []);
 
-  // Combine games from RAWG with user status
+  // Combine games with user status
   const combinedGames = games.map((game) => {
     const userGame = userLibrary.find((ug) => ug.gameId === game.id);
     if (userGame) {
@@ -175,61 +183,90 @@ const GameLibrary: React.FC = () => {
     return game;
   });
 
-  // Filter games based on user selection
+  // Filter games based on status if in library view
   const filteredGames =
-    filter === "all"
-      ? combinedGames
-      : combinedGames.filter((game) => game.status === filter);
+    viewType === "library" && statusFilter !== "all"
+      ? combinedGames.filter((game) => game.status === statusFilter)
+      : viewType === "library"
+      ? combinedGames.filter((game) => game.status)
+      : combinedGames;
 
-  // Handle search debounce
+  // Handle search
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (searchQuery) {
-        setPage(1);
-        fetchGames(searchQuery, 1);
-      }
-    }, 500);
-
-    return () => clearTimeout(timer);
+    if (searchQuery) {
+      setPage(1);
+      fetchGamesData("all", 1, searchQuery);
+    }
   }, [searchQuery]);
 
-  // Add game to user library
-  const addGameToLibrary = (gameId: number, status: GameStatus) => {
-    setUserLibrary((prev) => {
-      const existing = prev.find((game) => game.gameId === gameId);
-      if (existing) {
-        return prev.map((game) =>
-          game.gameId === gameId
-            ? {
-                ...game,
-                status,
-                lastPlayed:
-                  status === "playing"
-                    ? new Date().toISOString()
-                    : game.lastPlayed,
-              }
-            : game
-        );
-      } else {
-        return [
-          ...prev,
-          {
-            gameId,
-            status,
-            lastPlayed: status === "playing" ? new Date().toISOString() : null,
-          },
-        ];
-      }
-    });
-
-    // In a real app, you would also update this on your backend
+  // Handle view type change
+  const handleViewChange = (view: ViewType) => {
+    setViewType(view);
+    setPage(1);
+    
+    if (view !== "library" && !searchQuery) {
+      fetchGamesData(view, 1);
+    }
   };
+
+// Add/update game in user library
+const handleStatusChange = (gameId: number, status: GameStatus) => {
+  // First update the user library
+  setUserLibrary((prev) => {
+    const existing = prev.find((game) => game.gameId === gameId);
+    if (existing) {
+      return prev.map((game) =>
+        game.gameId === gameId
+          ? {
+              ...game,
+              status,
+              lastPlayed:
+                status === "playing"
+                  ? new Date().toISOString()
+                  : game.lastPlayed,
+            }
+          : game
+      );
+    } else {
+      return [
+        ...prev,
+        {
+          gameId,
+          status,
+          lastPlayed: status === "playing" ? new Date().toISOString() : null,
+        },
+      ];
+    }
+  });
+
+  // Then immediately update the UI by updating the games state
+  setGames((prevGames) => 
+    prevGames.map(game => 
+      game.id === gameId 
+        ? { ...game, status, lastPlayed: status === "playing" ? new Date().toISOString() : null }
+        : game
+    )
+  );
+
+  // If we're in library view, make sure to reset to "all" filter to see the newly added game
+  if (viewType === "library" && !userLibrary.find(game => game.gameId === gameId)) {
+    setStatusFilter("all");
+  }
+
+  // In a real app, you would also update this on your backend
+  console.log(`Game ${gameId} status changed to ${status}`);
+};
 
   // Load more games
   const handleLoadMore = () => {
     const nextPage = page + 1;
     setPage(nextPage);
-    fetchGames(searchQuery, nextPage);
+    
+    if (searchQuery) {
+      fetchGamesData("all", nextPage, searchQuery);
+    } else {
+      fetchGamesData(viewType, nextPage);
+    }
   };
 
   return (
@@ -244,29 +281,52 @@ const GameLibrary: React.FC = () => {
 
       <FilterContainer>
         <FilterButton
-          active={filter === "all"}
-          onClick={() => setFilter("all")}
+          active={viewType === "popular" && !searchQuery}
+          onClick={() => handleViewChange("popular")}
         >
-          All Games
+          Popular Games
         </FilterButton>
         <FilterButton
-          active={filter === "playing"}
-          onClick={() => setFilter("playing")}
+          active={viewType === "new" && !searchQuery}
+          onClick={() => handleViewChange("new")}
         >
-          Currently Playing
+          New Releases
         </FilterButton>
         <FilterButton
-          active={filter === "completed"}
-          onClick={() => setFilter("completed")}
+          active={viewType === "library"}
+          onClick={() => handleViewChange("library")}
         >
-          Completed
+          My Library
         </FilterButton>
-        <FilterButton
-          active={filter === "backlog"}
-          onClick={() => setFilter("backlog")}
-        >
-          Backlog
-        </FilterButton>
+        
+        {viewType === "library" && (
+          <>
+            <FilterButton
+              active={statusFilter === "all"}
+              onClick={() => setStatusFilter("all")}
+            >
+              All
+            </FilterButton>
+            <FilterButton
+              active={statusFilter === "playing"}
+              onClick={() => setStatusFilter("playing")}
+            >
+              Playing
+            </FilterButton>
+            <FilterButton
+              active={statusFilter === "completed"}
+              onClick={() => setStatusFilter("completed")}
+            >
+              Completed
+            </FilterButton>
+            <FilterButton
+              active={statusFilter === "backlog"}
+              onClick={() => setStatusFilter("backlog")}
+            >
+              Backlog
+            </FilterButton>
+          </>
+        )}
       </FilterContainer>
 
       {loading && page === 1 ? (
@@ -278,24 +338,30 @@ const GameLibrary: React.FC = () => {
               <GameCard
                 key={game.id}
                 game={game}
-                onStatusChange={(status) => addGameToLibrary(game.id, status)}
+                onStatusChange={handleStatusChange}
               />
             ))}
           </GamesGrid>
 
-          {hasMore && searchQuery && (
-            <LoadMoreButton onClick={handleLoadMore} disabled={loading}>
-              {loading ? "Loading..." : "Load More Games"}
+          {hasMore && !loading && (
+            <LoadMoreButton onClick={handleLoadMore}>
+              Load More Games
             </LoadMoreButton>
+          )}
+          
+          {loading && page > 1 && (
+            <LoadingSpinner>Loading more games...</LoadingSpinner>
           )}
         </>
       ) : (
         <NoGames>
           {searchQuery
             ? "No games found matching your search."
-            : filter !== "all"
-            ? `No games in the "${filter}" category.`
-            : "Try searching for games to add to your library."}
+            : viewType === "library"
+            ? statusFilter !== "all"
+              ? `No games in the "${statusFilter}" category.`
+              : "Your library is empty. Try adding some games!"
+            : "No games available. Try different filters."}
         </NoGames>
       )}
     </Container>

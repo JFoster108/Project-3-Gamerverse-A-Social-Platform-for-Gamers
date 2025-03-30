@@ -2,7 +2,7 @@
 import axios from "axios";
 
 // RAWG API key - In production, this should be stored in environment variables
-const API_KEY = "your_rawg_api_key"; // Replace with your actual key
+const API_KEY = "f4489c2d5bec448384cd31c55ef03eae"; // Replace with your actual key
 const BASE_URL = "https://api.rawg.io/api";
 
 export interface Game {
