@@ -15,6 +15,7 @@ interface User {
         xbox?: string;
         steam?: string;
     };
+    isAdmin?: boolean;  // Add isAdmin property to the User interface
 }
 
 interface AuthContextType {
@@ -44,7 +45,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
             if (storedToken) {
                 try {
-                    const decodedToken = jwtDecode<User & { exp: number }>(storedToken);
+                    const decodedToken = jwtDecode<User & { exp: number; isAdmin: boolean }>(storedToken);
                     const currentTime = Date.now() / 1000;
 
                     if (decodedToken.exp < currentTime) {
@@ -57,7 +58,12 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
                     setToken(storedToken);
                     setIsAuthenticated(true);
-                    setUser({ id: decodedToken.id, username: decodedToken.username, email: decodedToken.email });
+                    setUser({
+                        id: decodedToken.id,
+                        username: decodedToken.username,
+                        email: decodedToken.email,
+                        isAdmin: decodedToken.isAdmin,  // Ensure isAdmin is decoded
+                    });
                 } catch (error) {
                     console.error('Invalid token:', error);
                     logout();
@@ -71,9 +77,14 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const login = (newToken: string) => {
         localStorage.setItem('token', newToken);
         try {
-            const decodedToken = jwtDecode<User & { exp: number }>(newToken);
+            const decodedToken = jwtDecode<User & { exp: number; isAdmin: boolean }>(newToken);
             setToken(newToken);
-            setUser({ id: decodedToken.id, username: decodedToken.username, email: decodedToken.email });
+            setUser({
+                id: decodedToken.id,
+                username: decodedToken.username,
+                email: decodedToken.email,
+                isAdmin: decodedToken.isAdmin, // Ensure isAdmin is set
+            });
             setIsAuthenticated(true);
         } catch (error) {
             console.error('Invalid token on login:', error);
@@ -96,11 +107,12 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             email,
             joinedDate: new Date().toISOString(),
             avatarUrl: `https://ui-avatars.com/api/?name=${username}&background=random`,
+            isAdmin: false,  // Set to false for regular users
         };
 
         // Simulated token
         const mockToken = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.${btoa(
-            JSON.stringify({ id: userId, username, email, exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7 })
+            JSON.stringify({ id: userId, username, email, exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7, isAdmin: false })
         )}.DUMMY_SIGNATURE`;
 
         return mockToken;
