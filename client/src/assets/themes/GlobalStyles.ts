@@ -1,6 +1,8 @@
+// src/assets/themes/GlobalStyles.ts
 import { createGlobalStyle } from 'styled-components';
-import { ThemeType } from './themes'; // Make sure ThemeType is defined correctly
+import { ThemeType } from './themes'; // Import ThemeType from themes.ts
 
+// Define the type for the theme prop that will be passed to GlobalStyles
 export const GlobalStyles = createGlobalStyle<{ theme: ThemeType }>`
   *, *::before, *::after {
     box-sizing: border-box;
@@ -10,8 +12,7 @@ export const GlobalStyles = createGlobalStyle<{ theme: ThemeType }>`
 
   body {
     font-family: 'Inter', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Oxygen',
-      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-      sans-serif;
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background-color: ${({ theme }) => theme.colors.background};
