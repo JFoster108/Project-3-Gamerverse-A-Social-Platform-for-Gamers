@@ -1,4 +1,3 @@
-// src/pages/Profile.tsx
 import React from "react";
 import styled from "styled-components";
 import { useParams, Link } from "react-router-dom";
@@ -167,7 +166,6 @@ const AvatarSection = styled.div`
   gap: ${({ theme }) => theme.spacing.md};
 `;
 
-// Avatar container with relative positioning for the edit button
 const AvatarContainer = styled.div`
   position: relative;
   width: 150px;
@@ -183,7 +181,6 @@ const Avatar = styled.img`
   border: 4px solid ${({ theme }) => theme.colors.primary};
 `;
 
-// New edit overlay button
 const AvatarEditButton = styled(Link)`
   position: absolute;
   bottom: 5px;
