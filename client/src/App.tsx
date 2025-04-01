@@ -1,11 +1,10 @@
-// src/App.tsx
 import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
 import styled from 'styled-components';
-import { AuthProvider } from './context/AuthContext';
+import AuthProvider from './context/AuthContext'; // Correct import for default export
 import { PostsProvider } from './context/PostsContext';
-import { darkTheme, lightTheme } from './assets/themes/themes';
+import { darkTheme, lightTheme } from './assets/themes/themes'; // Ensure themes are imported correctly
 import { GlobalStyles } from './assets/themes/GlobalStyles';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
@@ -31,12 +30,13 @@ import AdminRoutes from './components/admin/AdminRoutes';
 import GameLibrary from './components/GameLibrary/GameLibrary';
 
 function App() {
-  const [theme, setTheme] = useState('dark');
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark'); // Set theme state with valid values
   
   const toggleTheme = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light');
+    setTheme(theme === 'light' ? 'dark' : 'light'); // Toggle between light and dark theme
   };
 
+  // Select theme based on state
   const themeObject = theme === 'light' ? lightTheme : darkTheme;
 
   return (
@@ -118,7 +118,7 @@ const MainContent = styled.main`
 const ContentContainer = styled.div`
   max-width: 1200px;
   width: 100%;
-  padding: 0 ${({ theme }) => theme.spacing.md};
+  padding: 0 ${({ theme }) => theme.spacing.md}; // Ensure the theme object has a spacing property
 `;
 
 export default App;

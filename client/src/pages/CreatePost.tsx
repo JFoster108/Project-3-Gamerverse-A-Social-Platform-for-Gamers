@@ -1,35 +1,34 @@
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { usePosts } from "../context/PostsContext";
-import React, { FC, FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
 
 const CreatePost: React.FC = () => {
   const { createPost } = usePosts();
   const navigate = useNavigate();
+  
   const [content, setContent] = useState("");
   const [gameTitle, setGameTitle] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Submit button clicked");
     
-    if (!content.trim()) {
-      console.log("Content is empty, not submitting");
-      return;
-    }
+    if (!content.trim()) return;
+    
+    setLoading(true);
     
     try {
-      console.log("Creating post with:", { content, gameTitle, imageUrl });
-      // Fix: Pass only 3 arguments to createPost 
+      // Create the post
       createPost(content, gameTitle || undefined, imageUrl || undefined);
-      console.log("Post created successfully");
       
-      // Navigate back to the home page
+      // Navigate back to home
       navigate("/");
     } catch (error) {
       console.error("Error creating post:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -53,8 +52,8 @@ const CreatePost: React.FC = () => {
         <FormGroup>
           <Label>Add a game (optional)</Label>
           <Input 
-            type="text"
-            placeholder="Enter game name"
+            type="text" 
+            placeholder="Game title"
             value={gameTitle}
             onChange={(e) => setGameTitle(e.target.value)}
           />
@@ -63,19 +62,20 @@ const CreatePost: React.FC = () => {
         <FormGroup>
           <Label>Add an image URL (optional)</Label>
           <Input 
-            type="text"
-            placeholder="Enter image URL"
+            type="text" 
+            placeholder="Image URL"
             value={imageUrl}
             onChange={(e) => setImageUrl(e.target.value)}
           />
+          <HelpText>Enter a URL to an image on the web</HelpText>
         </FormGroup>
 
         <ButtonContainer>
           <CancelButton type="button" onClick={() => navigate("/")}>
             Cancel
           </CancelButton>
-          <Button type="submit" disabled={!content.trim()}>
-            Post
+          <Button type="submit" disabled={!content.trim() || loading}>
+            {loading ? "Posting..." : "Post"}
           </Button>
         </ButtonContainer>
       </Form>
@@ -134,6 +134,11 @@ const Input = styled.input`
   border-radius: ${({ theme }) => theme.borderRadius};
   background-color: ${({ theme }) => theme.colors.surface};
   color: ${({ theme }) => theme.colors.text};
+`;
+
+const HelpText = styled.small`
+  color: ${({ theme }) => theme.colors.textSecondary};
+  font-size: ${({ theme }) => theme.fontSizes.small};
 `;
 
 const ButtonContainer = styled.div`
