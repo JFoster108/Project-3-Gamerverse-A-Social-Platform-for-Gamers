@@ -1,4 +1,3 @@
-cat << "EOF" > src / utils / api.ts;
 import axios from "axios";
 
 // Create an axios instance with base URL
@@ -23,7 +22,7 @@ api.interceptors.request.use(
 );
 
 // Example API functions (to be implemented with actual backend)
-export const login = async (email: string, password: string) => {
+export const login = async (/* email: string, password: string */) => {
   try {
     // For demo purposes only - in a real app, you would use:
     // const response = await api.post('/auth/login', { email, password });
@@ -45,9 +44,7 @@ export const login = async (email: string, password: string) => {
 };
 
 export const register = async (
-  username: string,
-  email: string,
-  password: string
+  /* username: string, email: string, password: string */
 ) => {
   try {
     // For demo purposes only - in a real app, you would use:
@@ -70,4 +67,3 @@ export const register = async (
 };
 
 export default api;
-EOF;
