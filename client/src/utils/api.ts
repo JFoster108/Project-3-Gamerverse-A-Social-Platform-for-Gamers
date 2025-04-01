@@ -1,69 +1,123 @@
-import axios from "axios";
+import { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ThemeProvider } from 'styled-components';
+import styled from 'styled-components';
+import { AuthProvider } from './context/AuthContext';
+import { PostsProvider } from './context/PostsContext';
+import { darkTheme, lightTheme } from './assets/themes/themes';
+import { GlobalStyles } from './assets/themes/GlobalStyles';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 
-// Create an axios instance with base URL
-const api = axios.create({
-  // This would be your backend API URL
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3001/api",
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
+// Layout Components
+import Header from './components/layout/Header';
+import Footer from './components/layout/Footer';
 
-// Add a request interceptor to include auth token
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+// Pages
+import Home from './pages/Home';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import Profile from './pages/Profile';
+import EditProfile from './pages/EditProfile';
+import CreatePost from './pages/CreatePost';
+import NotFound from './pages/NotFound';
+import RequestPasswordReset from './pages/RequestPasswordReset';
+import ResetPassword from './pages/ResetPassword';
 
-// Example API functions (to be implemented with actual backend)
-export const login = async (/* email: string, password: string */) => {
-  try {
-    // For demo purposes only - in a real app, you would use:
-    // const response = await api.post('/auth/login', { email, password });
-    // return response.data;
+// Admin Components
+import AdminRoutes from './components/admin/AdminRoutes';
 
-    // Mock successful login
-    return {
-      token:
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEyMyIsInVzZXJuYW1lIjoidGVzdHVzZXIiLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJleHAiOjE5MTYyMzkwMjJ9.oB3MmYKw8e1VR6Uwt-9q0LVwuWU-c842s9gqGN-G_FU",
-      user: {
-        id: "123",
-        username: "testuser",
-        email: "test@test.com",
-      },
-    };
-  } catch (error) {
-    throw error;
-  }
-};
+// Game Library
+import GameLibrary from './components/GameLibrary/GameLibrary';
 
-export const register = async (
-  /* username: string, email: string, password: string */
-) => {
-  try {
-    // For demo purposes only - in a real app, you would use:
-    // const response = await api.post('/auth/register', { username, email, password });
-    // return response.data;
+function App() {
+  const [theme, setTheme] = useState('dark');
+  
+  const toggleTheme = () => {
+    setTheme(theme === 'light' ? 'dark' : 'light');
+  };
 
-    // Mock successful registration
-    return {
-      token:
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEyMyIsInVzZXJuYW1lIjoidGVzdHVzZXIiLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJleHAiOjE5MTYyMzkwMjJ9.oB3MmYKw8e1VR6Uwt-9q0LVwuWU-c842s9gqGN-G_FU",
-      user: {
-        id: "123",
-        username: "testuser",
-        email: "test@test.com",
-      },
-    };
-  } catch (error) {
-    throw error;
-  }
-};
+  const themeObject = theme === 'light' ? lightTheme : darkTheme;
 
-export default api;
+  return (
+    <AuthProvider>
+      <PostsProvider>
+        <ThemeProvider theme={themeObject}>
+          <GlobalStyles />
+          <Router>
+            <AppContainer>
+              <Header toggleTheme={toggleTheme} currentTheme={theme} />
+              <MainContent>
+                <ContentContainer>
+                  <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/signup" element={<Signup />} />
+                    <Route path="/profile/:username" element={<Profile />} />
+                    <Route path="/request-password-reset" element={<RequestPasswordReset />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
+                    <Route 
+                      path="/profile/edit" 
+                      element={
+                        <ProtectedRoute>
+                          <EditProfile />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/create-post" 
+                      element={
+                        <ProtectedRoute>
+                          <CreatePost />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/game-library" 
+                      element={
+                        <ProtectedRoute>
+                          <GameLibrary />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/admin/*" 
+                      element={
+                        <ProtectedRoute>
+                          <AdminRoutes />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </ContentContainer>
+              </MainContent>
+              <Footer />
+            </AppContainer>
+          </Router>
+        </ThemeProvider>
+      </PostsProvider>
+    </AuthProvider>
+  );
+}
+
+const AppContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+`;
+
+const MainContent = styled.main`
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+`;
+
+const ContentContainer = styled.div`
+  max-width: 1200px;
+  width: 100%;
+  padding: 0 ${({ theme }) => theme.spacing.md};
+`;
+
+export default App;
