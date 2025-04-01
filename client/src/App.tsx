@@ -36,7 +36,8 @@ function App() {
     setTheme(theme === 'light' ? 'dark' : 'light'); // Toggle between light and dark theme
   };
 
-  const themeObject = theme === 'light' ? lightTheme : darkTheme; // Pick theme based on the state
+  // Select theme based on state
+  const themeObject = theme === 'light' ? lightTheme : darkTheme;
 
   return (
     <AuthProvider>
