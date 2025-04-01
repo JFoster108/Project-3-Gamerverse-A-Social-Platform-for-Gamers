@@ -1,5 +1,5 @@
 import { createGlobalStyle } from 'styled-components';
-import { ThemeType } from './themes';
+import { ThemeType } from './themes'; // Make sure ThemeType is defined correctly
 
 export const GlobalStyles = createGlobalStyle<{ theme: ThemeType }>`
   *, *::before, *::after {
@@ -21,7 +21,6 @@ export const GlobalStyles = createGlobalStyle<{ theme: ThemeType }>`
     width: 100%;
     overflow-x: hidden;
   }
-
 
   a {
     color: ${({ theme }) => theme.colors.primary};
