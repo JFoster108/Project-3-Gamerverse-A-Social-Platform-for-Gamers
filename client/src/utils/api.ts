@@ -1,123 +1,46 @@
-import { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ThemeProvider } from 'styled-components';
-import styled from 'styled-components';
-import { AuthProvider } from './context/AuthContext';
-import { PostsProvider } from './context/PostsContext';
-import { darkTheme, lightTheme } from './assets/themes/themes';
-import { GlobalStyles } from './assets/themes/GlobalStyles';
-import ProtectedRoute from './components/auth/ProtectedRoute';
+import axios from "axios";
 
-// Layout Components
-import Header from './components/layout/Header';
-import Footer from './components/layout/Footer';
+// Create an axios instance with base URL
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3001/api",
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
-// Pages
-import Home from './pages/Home';
-import Login from './pages/Login';
-import Signup from './pages/Signup';
-import Profile from './pages/Profile';
-import EditProfile from './pages/EditProfile';
-import CreatePost from './pages/CreatePost';
-import NotFound from './pages/NotFound';
-import RequestPasswordReset from './pages/RequestPasswordReset';
-import ResetPassword from './pages/ResetPassword';
+// Add a request interceptor to include auth token
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
-// Admin Components
-import AdminRoutes from './components/admin/AdminRoutes';
+// Example API functions (to be implemented with actual backend)
+export const login = async (/* email: string, password: string */) => {
+  try {
+    return {
+      token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+      user: { id: "123", username: "testuser", email: "test@test.com" },
+    };
+  } catch (error) {
+    throw error;
+  }
+};
 
-// Game Library
-import GameLibrary from './components/GameLibrary/GameLibrary';
+export const register = async (/* username: string, email: string, password: string */) => {
+  try {
+    return {
+      token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+      user: { id: "123", username: "testuser", email: "test@test.com" },
+    };
+  } catch (error) {
+    throw error;
+  }
+};
 
-function App() {
-  const [theme, setTheme] = useState('dark');
-  
-  const toggleTheme = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light');
-  };
-
-  const themeObject = theme === 'light' ? lightTheme : darkTheme;
-
-  return (
-    <AuthProvider>
-      <PostsProvider>
-        <ThemeProvider theme={themeObject}>
-          <GlobalStyles />
-          <Router>
-            <AppContainer>
-              <Header toggleTheme={toggleTheme} currentTheme={theme} />
-              <MainContent>
-                <ContentContainer>
-                  <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/signup" element={<Signup />} />
-                    <Route path="/profile/:username" element={<Profile />} />
-                    <Route path="/request-password-reset" element={<RequestPasswordReset />} />
-                    <Route path="/reset-password" element={<ResetPassword />} />
-                    <Route 
-                      path="/profile/edit" 
-                      element={
-                        <ProtectedRoute>
-                          <EditProfile />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    <Route 
-                      path="/create-post" 
-                      element={
-                        <ProtectedRoute>
-                          <CreatePost />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    <Route 
-                      path="/game-library" 
-                      element={
-                        <ProtectedRoute>
-                          <GameLibrary />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    <Route 
-                      path="/admin/*" 
-                      element={
-                        <ProtectedRoute>
-                          <AdminRoutes />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </ContentContainer>
-              </MainContent>
-              <Footer />
-            </AppContainer>
-          </Router>
-        </ThemeProvider>
-      </PostsProvider>
-    </AuthProvider>
-  );
-}
-
-const AppContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  width: 100%;
-`;
-
-const MainContent = styled.main`
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  width: 100%;
-`;
-
-const ContentContainer = styled.div`
-  max-width: 1200px;
-  width: 100%;
-  padding: 0 ${({ theme }) => theme.spacing.md};
-`;
-
-export default App;
+export default api;

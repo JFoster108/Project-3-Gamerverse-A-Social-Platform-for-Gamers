@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
 import styled from 'styled-components';
-import { AuthProvider } from './context/AuthContext';
+import AuthProvider from './context/AuthContext'; // Correct import for default export
 import { PostsProvider } from './context/PostsContext';
 import { darkTheme, lightTheme } from './assets/themes/themes';
 import { GlobalStyles } from './assets/themes/GlobalStyles';

@@ -7,14 +7,12 @@ const Profile = () => {
   const { username } = useParams<{ username: string }>();
   const { user } = useAuth();
   
-  // Determine if this is the current user's profile
   const isCurrentUser = user?.username === username;
 
-  // Use actual user data if it's the current user, otherwise use mock data
   const userData = isCurrentUser ? user : {
     username: username || "gamer123",
     avatarUrl: "https://via.placeholder.com/150",
-    bio: "Passionate gamer since the NES days. I love RPGs, adventure games, and the occasional FPS.",
+    bio: "Passionate gamer since the NES days.",
     joinedDate: "January 2023",
     friendCodes: {
       nintendo: "SW-1234-5678-9012",
@@ -29,7 +27,6 @@ const Profile = () => {
     },
   };
 
-  // Mock game collection data
   const gameCollection = [
     {
       id: "1",
@@ -59,7 +56,7 @@ const Profile = () => {
       <ProfileHeader>
         <AvatarSection>
           <AvatarContainer>
-            <Avatar src={userData.avatarUrl || "https://via.placeholder.com/150"} alt={userData.username} />
+            <Avatar src={userData.avatarUrl} alt={userData.username} />
             {isCurrentUser && (
               <AvatarEditButton to="/profile/edit" title="Change profile picture">
                 <EditIcon>✏️</EditIcon>
@@ -394,7 +391,7 @@ const GameStatus = styled.span<GameStatusProps>`
       default:
         return `${theme.colors.info}20`;
     }
-  }};
+  }}; 
   color: ${({ theme, status }) => {
     switch (status) {
       case "Now Playing":
