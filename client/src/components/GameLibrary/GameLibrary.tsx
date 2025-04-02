@@ -1,4 +1,6 @@
 // src/components/GameLibrary/GameLibrary.tsx
+// Fix the issues with missing theme properties
+
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import GameSearchBar from "./GameSearchBar";
@@ -46,7 +48,7 @@ const FilterContainer = styled.div`
 
 const FilterButton = styled.button<{ active: boolean }>`
   background-color: ${(props) =>
-    props.active ? props.theme.colors.primary : props.theme.colors.buttonBackground};
+    props.active ? props.theme.colors.primary : props.theme.colors.surface};
   color: ${(props) => (props.active ? props.theme.colors.buttonText : props.theme.colors.text)};
   border: none;
   border-radius: ${({ theme }) => theme.borderRadius};
@@ -58,7 +60,7 @@ const FilterButton = styled.button<{ active: boolean }>`
     background-color: ${(props) =>
       props.active
         ? props.theme.colors.secondary
-        : props.theme.colors.buttonBackgroundHover};
+        : props.theme.colors.primary + '20'};
   }
 `;
 

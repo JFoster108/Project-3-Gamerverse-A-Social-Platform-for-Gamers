@@ -1,4 +1,6 @@
 // src/components/GameLibrary/GameCard.tsx
+// Fix the issue with backgroundHover property
+
 import React, { useState, useRef, useEffect } from "react";
 import styled from "styled-components";
 import { Game } from "../../services/rawgApi";
@@ -284,7 +286,7 @@ const StatusOption = styled.button`
   gap: 8px;
 
   &:hover {
-    background-color: ${({ theme }) => theme.colors.backgroundHover};
+    background-color: ${({ theme }) => theme.colors.background};
   }
 
   &:not(:last-child) {

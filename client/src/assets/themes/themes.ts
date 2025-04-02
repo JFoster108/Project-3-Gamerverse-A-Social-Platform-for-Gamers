@@ -1,4 +1,6 @@
-// Base theme with common properties
+// src/assets/themes/themes.ts
+// First, update your base theme type to include the missing properties
+
 const baseTheme = {
     borderRadius: '8px',
     transition: 'all 0.3s ease',
@@ -8,6 +10,7 @@ const baseTheme = {
         large: '1.25rem',
         xlarge: '1.5rem',
         xxlarge: '2rem',
+        regular: '1rem', // Added missing property
     },
     spacing: {
         xs: '0.25rem',
@@ -41,6 +44,9 @@ export const lightTheme = {
         success: '#4caf50',
         warning: '#ff9800',
         info: '#2196f3',
+        buttonBackground: '#6200ee', // Added missing property
+        buttonBackgroundHover: '#7722ff', // Added missing property
+        backgroundHover: '#f0f0f0', // Added missing property
     }
 };
 
@@ -66,6 +72,9 @@ export const darkTheme = {
         success: '#4caf50',
         warning: '#ff9800',
         info: '#2196f3',
+        buttonBackground: '#bb86fc', // Added missing property
+        buttonBackgroundHover: '#c99eff', // Added missing property
+        backgroundHover: '#2c2c2c', // Added missing property
     }
 };
 
@@ -91,6 +100,9 @@ export const switchTheme = {
         success: '#4caf50',
         warning: '#ff9800',
         info: '#2196f3',
+        buttonBackground: '#e60012',
+        buttonBackgroundHover: '#ff1a2c',
+        backgroundHover: '#f0f0f0',
     }
 };
 
@@ -116,6 +128,9 @@ export const playstationTheme = {
         success: '#4caf50',
         warning: '#ff9800',
         info: '#2196f3',
+        buttonBackground: '#0070d1',
+        buttonBackgroundHover: '#0086ff',
+        backgroundHover: '#222530',
     }
 };
 
@@ -141,6 +156,9 @@ export const xboxTheme = {
         success: '#4caf50',
         warning: '#ff9800',
         info: '#2196f3',
+        buttonBackground: '#107c10',
+        buttonBackgroundHover: '#15a215',
+        backgroundHover: '#f0f0f0',
     }
 };
 
