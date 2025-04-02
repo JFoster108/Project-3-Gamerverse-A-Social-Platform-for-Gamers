@@ -1,32 +1,69 @@
+// src/pages/Profile.tsx
+// This fixes the TypeScript errors in the Profile component
+
 import React from "react";
 import styled from "styled-components";
 import { useParams, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-const Profile = () => {
+// Define the User interface
+interface User {
+  id: string;
+  username: string;
+  email: string;
+  bio?: string;
+  avatarUrl?: string;
+  joinedDate?: string;
+  friendCodes?: {
+    nintendo?: string;
+    playstation?: string;
+    xbox?: string;
+    steam?: string;
+  };
+  stats?: {
+    posts: number;
+    games: number;
+    completed: number;
+  };
+  isAdmin?: boolean;
+}
+
+// Add a more comprehensive mock user
+const mockUser: User = {
+  id: "mock-user",
+  username: "gamer123",
+  email: "gamer123@example.com",
+  avatarUrl: "https://via.placeholder.com/150",
+  bio: "Passionate gamer since the NES days.",
+  joinedDate: "January 2023",
+  friendCodes: {
+    nintendo: "SW-1234-5678-9012",
+    playstation: "gamerlover123",
+    xbox: "gamerlover123",
+    steam: "gamerlover123",
+  },
+  stats: {
+    posts: 42,
+    games: 37,
+    completed: 24,
+  }
+};
+
+const Profile: React.FC = () => {
   const { username } = useParams<{ username: string }>();
   const { user } = useAuth();
   
   const isCurrentUser = user?.username === username;
 
-  const userData = isCurrentUser ? user : {
-    username: username || "gamer123",
-    avatarUrl: "https://via.placeholder.com/150",
-    bio: "Passionate gamer since the NES days.",
-    joinedDate: "January 2023",
-    friendCodes: {
-      nintendo: "SW-1234-5678-9012",
-      playstation: "gamerlover123",
-      xbox: "gamerlover123",
-      steam: "gamerlover123",
-    },
-    stats: {
-      posts: 42,
-      games: 37,
-      completed: 24,
-    },
-  };
+  // Use the mockUser as fallback if not the current user
+  const userData = isCurrentUser ? user : mockUser;
 
+  // Make sure userData is not null before accessing properties
+  if (!userData) {
+    return <div>Loading user data...</div>;
+  }
+
+  // Game collection data
   const gameCollection = [
     {
       id: "1",
@@ -56,7 +93,7 @@ const Profile = () => {
       <ProfileHeader>
         <AvatarSection>
           <AvatarContainer>
-            <Avatar src={userData.avatarUrl} alt={userData.username} />
+            <Avatar src={userData.avatarUrl || "https://via.placeholder.com/150"} alt={userData.username} />
             {isCurrentUser && (
               <AvatarEditButton to="/profile/edit" title="Change profile picture">
                 <EditIcon>✏️</EditIcon>
@@ -70,8 +107,8 @@ const Profile = () => {
 
         <ProfileInfo>
           <Username>{userData.username}</Username>
-          <JoinDate>Member since {userData.joinedDate}</JoinDate>
-          <Bio>{userData.bio}</Bio>
+          <JoinDate>Member since {userData.joinedDate || "2023"}</JoinDate>
+          <Bio>{userData.bio || "No bio provided yet."}</Bio>
 
           <StatsGrid>
             <Stat>
@@ -140,6 +177,7 @@ const Profile = () => {
   );
 };
 
+// Styled components defined below...
 const Container = styled.div`
   max-width: 1000px;
   margin: 0 auto;

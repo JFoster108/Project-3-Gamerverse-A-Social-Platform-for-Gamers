@@ -1,4 +1,6 @@
 // src/components/layout/Header.tsx
+// Fix the issue with the regular font size property
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -297,7 +299,7 @@ const DropdownItemButton = styled.button`
   background: none;
   border: none;
   cursor: pointer;
-  font-size: ${({ theme }) => theme.fontSizes.regular};
+  font-size: ${({ theme }) => theme.fontSizes.medium};
   transition: background-color 0.2s;
 
   &:hover {

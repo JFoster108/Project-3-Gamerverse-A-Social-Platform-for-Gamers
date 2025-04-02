@@ -1,3 +1,6 @@
+// src/context/PostsContext.tsx
+// Create this file if it doesn't exist, or replace the content with this:
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { useAuth } from './AuthContext';
@@ -40,21 +43,51 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const { user } = useAuth();
 
-  console.log("PostsProvider initialized with user:", user);
-
   // Load posts from localStorage on mount
   useEffect(() => {
     const loadPosts = () => {
-      console.log("Loading posts from localStorage");
       setLoading(true);
       try {
         const storedPosts = localStorage.getItem('posts');
         if (storedPosts) {
           const parsedPosts = JSON.parse(storedPosts);
-          console.log(`Found ${parsedPosts.length} posts in localStorage`);
           setPosts(parsedPosts);
         } else {
-          console.log("No posts found in localStorage");
+          // Set some default posts if none exist
+          const defaultPosts: Post[] = [
+            {
+              id: "1",
+              author: {
+                id: "default-user",
+                username: "gamerlover",
+                avatarUrl: "https://via.placeholder.com/50"
+              },
+              content: "Just finished The Legend of Zelda: Tears of the Kingdom. What an amazing game!",
+              game: {
+                id: "zelda-totk",
+                title: "The Legend of Zelda: Tears of the Kingdom",
+                imageUrl: "https://via.placeholder.com/150"
+              },
+              likes: 25,
+              comments: 8,
+              createdAt: new Date().toISOString()
+            },
+            {
+              id: "2",
+              author: {
+                id: "default-user-2",
+                username: "consolegamer",
+                avatarUrl: "https://via.placeholder.com/50"
+              },
+              content: "Who's excited about the new PlayStation showcase?",
+              likes: 13,
+              comments: 5,
+              createdAt: new Date(Date.now() - 86400000).toISOString()
+            }
+          ];
+          
+          setPosts(defaultPosts);
+          localStorage.setItem('posts', JSON.stringify(defaultPosts));
         }
       } catch (error) {
         console.error('Error loading posts from localStorage:', error);
@@ -68,7 +101,6 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
 
   // Save posts to localStorage whenever they change
   useEffect(() => {
-    console.log(`Saving ${posts.length} posts to localStorage`);
     localStorage.setItem('posts', JSON.stringify(posts));
   }, [posts]);
 
@@ -77,14 +109,10 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
     gameTitle?: string,
     imageUrl?: string
   ) => {
-    console.log("Creating post with:", { content, gameTitle, imageUrl });
-    
     if (!user) {
       console.error("Cannot create post: No user logged in");
       return;
     }
-
-    console.log("Current user creating post:", user);
 
     const newPost: Post = {
       id: uuidv4(),
@@ -97,7 +125,7 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
       game: gameTitle ? {
         id: uuidv4(),
         title: gameTitle,
-        imageUrl: 'https://via.placeholder.com/60' // Default placeholder
+        imageUrl: 'https://via.placeholder.com/60'
       } : undefined,
       imageUrl,
       likes: 0,
@@ -105,32 +133,22 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
       createdAt: new Date().toISOString(),
       liked: false
     };
-
-    console.log("Created new post with ID:", newPost.id);
     
     // Add the new post to the beginning of the posts array
-    const updatedPosts = [newPost, ...posts];
-    console.log(`Updating posts array. New length: ${updatedPosts.length}`);
-    
-    setPosts(updatedPosts);
-    console.log("Posts state updated successfully");
+    setPosts(prevPosts => [newPost, ...prevPosts]);
   };
 
   const likePost = (postId: string) => {
-    console.log(`Toggling like for post with ID: ${postId}`);
-    
     if (!user) {
       console.log("Cannot like post: No user logged in");
       return;
     }
     
     setPosts(prevPosts => {
-      const updatedPosts = prevPosts.map(post => {
+      return prevPosts.map(post => {
         if (post.id === postId) {
           const wasLiked = post.liked || false;
           const newLikeCount = wasLiked ? post.likes - 1 : post.likes + 1;
-          
-          console.log(`Post ${postId} like state: ${wasLiked} → ${!wasLiked}, likes: ${post.likes} → ${newLikeCount}`);
           
           return {
             ...post,
@@ -140,14 +158,8 @@ export const PostsProvider: React.FC<PostsProviderProps> = ({ children }) => {
         }
         return post;
       });
-      
-      return updatedPosts;
     });
-    
-    console.log("Posts updated after like action");
   };
-
-  console.log(`Rendering PostsProvider with ${posts.length} posts, loading: ${loading}`);
 
   return (
     <PostsContext.Provider value={{ posts, loading, createPost, likePost }}>
