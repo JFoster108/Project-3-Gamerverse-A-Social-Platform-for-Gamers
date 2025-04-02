@@ -1,3 +1,6 @@
+// src/context/AuthContext.tsx
+// Fix the unused variable warnings
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import { v4 as uuidv4 } from 'uuid';
@@ -15,7 +18,12 @@ interface User {
         xbox?: string;
         steam?: string;
     };
-    isAdmin?: boolean;  // Add isAdmin property to the User interface
+    stats?: {
+        posts: number;
+        games: number;
+        completed: number;
+    };
+    isAdmin?: boolean;
 }
 
 interface AuthContextType {
@@ -62,7 +70,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                         id: decodedToken.id,
                         username: decodedToken.username,
                         email: decodedToken.email,
-                        isAdmin: decodedToken.isAdmin,  // Ensure isAdmin is decoded
+                        isAdmin: decodedToken.isAdmin,
                     });
                 } catch (error) {
                     console.error('Invalid token:', error);
@@ -83,7 +91,16 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 id: decodedToken.id,
                 username: decodedToken.username,
                 email: decodedToken.email,
-                isAdmin: decodedToken.isAdmin, // Ensure isAdmin is set
+                isAdmin: decodedToken.isAdmin,
+                // Adding other fields to make it more complete
+                bio: "I'm a gamer!",
+                avatarUrl: `https://ui-avatars.com/api/?name=${decodedToken.username}&background=random`,
+                joinedDate: new Date().toISOString(),
+                stats: {
+                    posts: 0,
+                    games: 0,
+                    completed: 0
+                }
             });
             setIsAuthenticated(true);
         } catch (error) {
@@ -100,19 +117,18 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
 
     const signup = async (username: string, email: string, password: string): Promise<string> => {
+        // Creating a mock user for signup
         const userId = uuidv4();
-        const newUser: User = {
-            id: userId,
-            username,
-            email,
-            joinedDate: new Date().toISOString(),
-            avatarUrl: `https://ui-avatars.com/api/?name=${username}&background=random`,
-            isAdmin: false,  // Set to false for regular users
-        };
-
-        // Simulated token
+        
+        // Generate a mock token with the user data
         const mockToken = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.${btoa(
-            JSON.stringify({ id: userId, username, email, exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7, isAdmin: false })
+            JSON.stringify({ 
+                id: userId, 
+                username, 
+                email, 
+                exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7, // 1 week expiration
+                isAdmin: false 
+            })
         )}.DUMMY_SIGNATURE`;
 
         return mockToken;
