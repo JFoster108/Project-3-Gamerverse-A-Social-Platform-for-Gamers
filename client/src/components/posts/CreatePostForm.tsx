@@ -1,9 +1,10 @@
+// src/components/posts/CreatePostForm.tsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { usePosts } from "../context/PostsContext";
+import { usePosts } from "../../context/PostsContext";
 
-const CreatePost: React.FC = () => {
+const CreatePostForm: React.FC = () => {
   const { createPost } = usePosts();
   const navigate = useNavigate();
   
@@ -180,4 +181,4 @@ const CancelButton = styled.button`
   }
 `;
 
-export default CreatePost;
+export default CreatePostForm;
