@@ -1,6 +1,7 @@
 // src/assets/themes/GlobalStyles.ts
+// Add proper theme type
 import { createGlobalStyle } from 'styled-components';
-import { ThemeType } from './themes'; // Import ThemeType from themes.ts
+import { ThemeType } from './themes';
 
 // Define the type for the theme prop that will be passed to GlobalStyles
 export const GlobalStyles = createGlobalStyle<{ theme: ThemeType }>`
