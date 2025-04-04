@@ -11,8 +11,17 @@ export default defineConfig({
       }
     },
     headers: {
-      'Content-Security-Policy':
-        "default-src 'self'; font-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'"
+      'Content-Security-Policy': [
+        "default-src 'self';",
+        "script-src 'self' 'unsafe-inline';",
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;",
+        "style-src-elem 'self' https://fonts.googleapis.com;",
+        "font-src 'self' https://fonts.gstatic.com data:;",
+        "connect-src 'self';",
+        "img-src 'self' data:;",
+        "object-src 'none';",
+        "frame-ancestors 'none';"
+      ].join(' ')
     }
   }
 })
