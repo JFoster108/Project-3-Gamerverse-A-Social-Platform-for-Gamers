@@ -1,6 +1,7 @@
 import express, { Request, Response, NextFunction, Application } from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import path from "path";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import cron from "node-cron";
@@ -48,6 +49,16 @@ const server = new ApolloServer({
 async function startServer() {
   await server.start();
   server.applyMiddleware({ app, cors: false });
+
+  if (process.env.NODE_ENV === "production") {
+    const __dirname = path.resolve();
+  
+    app.use(express.static(path.join(__dirname, "../client/dist")));
+  
+    app.get("*", (_req, res) => {
+      res.sendFile(path.join(__dirname, "../client/dist", "index.html"));
+    });
+  }
 
   // Global error handler
   app.use(errorHandler);
