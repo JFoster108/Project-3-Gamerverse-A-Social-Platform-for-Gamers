@@ -3,7 +3,7 @@ services:
     name: gamerverse
     env: static
     buildCommand: cd client && npm install && npm run build
-    staticPublishPath: ./client/dist
+    staticPublishPath: ./client  # Updated path
     routes:
       - type: rewrite
         source: /*
