@@ -1,6 +1,8 @@
+// src/services/rawgApi.ts
 import axios from "axios";
 
-const BASE_URL = "/api";
+const RAWG_API_KEY = import.meta.env.VITE_RAWG_KEY;
+const BASE_URL = "https://api.rawg.io/api";
 
 export interface Game {
   id: number;
@@ -27,51 +29,46 @@ export interface SearchGamesResponse {
   previous: string | null;
 }
 
-// Function to filter out games with potential adult content
-const filterAdultContent = (games: Game[]): Game[] => {
-  const adultKeywords = ['adult', 'nudity', 'mature', 'sex', 'erotic']; // Add more as needed
-  return games.filter(game => 
-    !adultKeywords.some(keyword => 
-      game.name.toLowerCase().includes(keyword) ||
-      game.genres.some(genre => keyword === genre.name.toLowerCase())
-    )
-  );
-};
-
+// 🔍 Search Games
 export const searchGames = async (
   query: string,
   page = 1
 ): Promise<SearchGamesResponse> => {
   const response = await axios.get(`${BASE_URL}/games`, {
     params: {
+      key: RAWG_API_KEY,
       search: query,
       page,
       page_size: 12,
     },
   });
-  const filteredResults = filterAdultContent(response.data.results);
-  return { ...response.data, results: filteredResults };
-};
-
-export const getGameDetails = async (gameId: number): Promise<Game> => {
-  const response = await axios.get(`${BASE_URL}/games/${gameId}`);
   return response.data;
 };
 
+// 📘 Get Game Details
+export const getGameDetails = async (gameId: number): Promise<Game> => {
+  const response = await axios.get(`${BASE_URL}/games/${gameId}`, {
+    params: { key: RAWG_API_KEY },
+  });
+  return response.data;
+};
+
+// ⭐ Popular Games
 export const getPopularGames = async (
   page = 1
 ): Promise<SearchGamesResponse> => {
   const response = await axios.get(`${BASE_URL}/games`, {
     params: {
+      key: RAWG_API_KEY,
       ordering: "-rating",
       page,
       page_size: 12,
     },
   });
-  const filteredResults = filterAdultContent(response.data.results);
-  return { ...response.data, results: filteredResults };
+  return response.data;
 };
 
+// 🆕 New Releases
 export const getNewReleases = async (
   page = 1
 ): Promise<SearchGamesResponse> => {
@@ -82,12 +79,12 @@ export const getNewReleases = async (
 
   const response = await axios.get(`${BASE_URL}/games`, {
     params: {
+      key: RAWG_API_KEY,
       dates: `${lastYearDate},${currentDate}`,
       ordering: "-released",
       page,
       page_size: 12,
     },
   });
-  const filteredResults = filterAdultContent(response.data.results);
-  return { ...response.data, results: filteredResults };
+  return response.data;
 };
