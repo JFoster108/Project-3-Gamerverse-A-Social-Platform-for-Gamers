@@ -1,3 +1,5 @@
+server.ts code from 9:10 am 3/5/25 original code 
+
 import express, { Request, Response, NextFunction, Application } from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";

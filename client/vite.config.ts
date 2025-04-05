@@ -1,3 +1,4 @@
+// client/vite.config.ts
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
@@ -14,15 +15,14 @@ export default defineConfig({
     headers: {
       'Content-Security-Policy': [
         "default-src 'self';",
-        "script-src 'self' 'unsafe-inline';",
-        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;",
-        "style-src-elem 'self' https://fonts.googleapis.com;",
-        "font-src 'self' https://fonts.gstatic.com data:;",
-        "connect-src 'self';",
-        "img-src 'self' data:;",
-        "object-src 'none';",
-        "frame-ancestors 'none';"
+        "script-src 'self' 'unsafe-inline';", // Allows inline scripts and those loaded from the same origin
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;", // Consolidated style-src includes inline styles and Google Fonts
+        "font-src 'self' https://fonts.gstatic.com data:;", // Allows fonts to be loaded from Google CDN and data URLs
+        "connect-src 'self' https://api.rawg.io;", // Allow connections to RAWG API
+        "img-src 'self' data: https://media.rawg.io https://via.placeholder.com;", // Allow images from RAWG and placeholder services
+        "object-src 'none';", // Prevents object, embed, and applet elements from loading external resources
+        "frame-ancestors 'none';" // Disallows embedding the page in frames (Clickjacking protection)
       ].join(' ')
     }
   }
-})
+});
