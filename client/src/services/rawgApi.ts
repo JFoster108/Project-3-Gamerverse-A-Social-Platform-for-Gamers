@@ -1,7 +1,5 @@
-// src/services/rawgApi.ts
 import axios from "axios";
 
-// Using our server proxy instead of direct API calls
 const BASE_URL = "/api";
 
 export interface Game {
@@ -29,6 +27,17 @@ export interface SearchGamesResponse {
   previous: string | null;
 }
 
+// Function to filter out games with potential adult content
+const filterAdultContent = (games: Game[]): Game[] => {
+  const adultKeywords = ['adult', 'nudity', 'mature', 'sex', 'erotic']; // Add more as needed
+  return games.filter(game => 
+    !adultKeywords.some(keyword => 
+      game.name.toLowerCase().includes(keyword) ||
+      game.genres.some(genre => keyword === genre.name.toLowerCase())
+    )
+  );
+};
+
 export const searchGames = async (
   query: string,
   page = 1
@@ -40,7 +49,8 @@ export const searchGames = async (
       page_size: 12,
     },
   });
-  return response.data;
+  const filteredResults = filterAdultContent(response.data.results);
+  return { ...response.data, results: filteredResults };
 };
 
 export const getGameDetails = async (gameId: number): Promise<Game> => {
@@ -58,7 +68,8 @@ export const getPopularGames = async (
       page_size: 12,
     },
   });
-  return response.data;
+  const filteredResults = filterAdultContent(response.data.results);
+  return { ...response.data, results: filteredResults };
 };
 
 export const getNewReleases = async (
@@ -77,5 +88,6 @@ export const getNewReleases = async (
       page_size: 12,
     },
   });
-  return response.data;
+  const filteredResults = filterAdultContent(response.data.results);
+  return { ...response.data, results: filteredResults };
 };
