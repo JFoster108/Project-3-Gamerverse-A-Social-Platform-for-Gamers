@@ -1,4 +1,3 @@
-
 import express, { Request, Response, NextFunction, Application } from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
@@ -13,6 +12,7 @@ import adminResolvers from "./graphql/resolvers/adminResolvers";
 import { createContext } from "./utils/context";
 import { sendDailyModerationSummary } from "./utils/moderationUtils";
 import { errorHandler } from "./middleware/errorHandler";
+import axios from "axios";
 
 dotenv.config();
 
@@ -22,7 +22,15 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(express.json());
 app.use(cookieParser());
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+      "img-src": ["'self'", "data:", "https://media.rawg.io", "https://via.placeholder.com"],
+      "connect-src": ["'self'", "https://api.rawg.io"]
+    }
+  }
+}));
 
 // MongoDB Connection
 mongoose
@@ -34,6 +42,38 @@ mongoose
 cron.schedule("0 0 * * *", async () => {
   console.log("Running daily moderation summary email...");
   await sendDailyModerationSummary();
+});
+
+// RAWG API proxy endpoints
+const RAWG_API_KEY = process.env.RAWG_API_KEY || "f4489c2d5bec448384cd31c55ef03eae";
+
+app.get("/api/games", async (req: Request, res: Response) => {
+  try {
+    const response = await axios.get("https://api.rawg.io/api/games", {
+      params: {
+        ...req.query,
+        key: RAWG_API_KEY
+      }
+    });
+    res.json(response.data);
+  } catch (error) {
+    console.error("RAWG API Error:", error);
+    res.status(500).json({ error: "Failed to fetch games data" });
+  }
+});
+
+app.get("/api/games/:id", async (req: Request, res: Response) => {
+  try {
+    const response = await axios.get(`https://api.rawg.io/api/games/${req.params.id}`, {
+      params: {
+        key: RAWG_API_KEY
+      }
+    });
+    res.json(response.data);
+  } catch (error) {
+    console.error("RAWG API Error:", error);
+    res.status(500).json({ error: "Failed to fetch game details" });
+  }
 });
 
 // Apollo Server setup

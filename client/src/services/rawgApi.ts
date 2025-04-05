@@ -1,9 +1,8 @@
 // src/services/rawgApi.ts
 import axios from "axios";
 
-// RAWG API key - In production, this should be stored in environment variables
-const API_KEY = "f4489c2d5bec448384cd31c55ef03eae"; // Replace with your actual key
-const BASE_URL = "https://api.rawg.io/api";
+// Using our server proxy instead of direct API calls
+const BASE_URL = "/api";
 
 export interface Game {
   id: number;
@@ -36,7 +35,6 @@ export const searchGames = async (
 ): Promise<SearchGamesResponse> => {
   const response = await axios.get(`${BASE_URL}/games`, {
     params: {
-      key: API_KEY,
       search: query,
       page,
       page_size: 12,
@@ -46,11 +44,7 @@ export const searchGames = async (
 };
 
 export const getGameDetails = async (gameId: number): Promise<Game> => {
-  const response = await axios.get(`${BASE_URL}/games/${gameId}`, {
-    params: {
-      key: API_KEY,
-    },
-  });
+  const response = await axios.get(`${BASE_URL}/games/${gameId}`);
   return response.data;
 };
 
@@ -59,7 +53,6 @@ export const getPopularGames = async (
 ): Promise<SearchGamesResponse> => {
   const response = await axios.get(`${BASE_URL}/games`, {
     params: {
-      key: API_KEY,
       ordering: "-rating",
       page,
       page_size: 12,
@@ -78,7 +71,6 @@ export const getNewReleases = async (
 
   const response = await axios.get(`${BASE_URL}/games`, {
     params: {
-      key: API_KEY,
       dates: `${lastYearDate},${currentDate}`,
       ordering: "-released",
       page,
