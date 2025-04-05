@@ -1,10 +1,16 @@
-// client/vite.config.ts
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
   server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5000', // Update this to the actual backend API URL on your server or Render
+        changeOrigin: true,
+        secure: false,
+      },
+    },
     headers: {
       'Content-Security-Policy': [
         "default-src 'self';",
@@ -15,7 +21,7 @@ export default defineConfig({
         "img-src 'self' data: https://media.rawg.io https://via.placeholder.com;",
         "object-src 'none';",
         "frame-ancestors 'none';"
-      ].join(' ')
-    }
-  }
+      ].join(' '),
+    },
+  },
 });
