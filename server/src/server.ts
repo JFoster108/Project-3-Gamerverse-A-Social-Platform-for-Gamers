@@ -1,4 +1,4 @@
-import express, { Request, Response, NextFunction, Application } from "express";
+import express, { Request, Response } from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import path from "path";
@@ -76,17 +76,6 @@ app.get("/api/games/:id", async (req: Request, res: Response) => {
   }
 });
 
-// Similarly update the game details endpoint
-app.get("/api/games/:id", async (req: Request, res: Response) => {
-  try {
-    const response = await axios.get(`https://api.rawg.io/api/games/${req.params.id}`, {
-      params: {
-        key: RAWG_API_KEY
-      }
-    });
-    
-  
-
 // Apollo Server setup
 const server = new ApolloServer({
   typeDefs,
@@ -104,9 +93,7 @@ async function startServer() {
 
   if (process.env.NODE_ENV === "production") {
     const __dirname = path.resolve();
-  
     app.use(express.static(path.join(__dirname, "../client/dist")));
-  
     app.get("*", (_req, res) => {
       res.sendFile(path.join(__dirname, "../client/dist", "index.html"));
     });
