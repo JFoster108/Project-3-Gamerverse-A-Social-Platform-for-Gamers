@@ -1,8 +1,8 @@
 // src/services/rawgApi.ts
 import axios from "axios";
 
-const RAWG_API_KEY = import.meta.env.VITE_RAWG_KEY;
-const BASE_URL = "https://api.rawg.io/api";
+// Using our server proxy instead of direct API calls
+const BASE_URL = "/api";
 
 export interface Game {
   id: number;
@@ -29,14 +29,12 @@ export interface SearchGamesResponse {
   previous: string | null;
 }
 
-// 🔍 Search Games
 export const searchGames = async (
   query: string,
   page = 1
 ): Promise<SearchGamesResponse> => {
   const response = await axios.get(`${BASE_URL}/games`, {
     params: {
-      key: RAWG_API_KEY,
       search: query,
       page,
       page_size: 12,
@@ -45,21 +43,16 @@ export const searchGames = async (
   return response.data;
 };
 
-// 📘 Get Game Details
 export const getGameDetails = async (gameId: number): Promise<Game> => {
-  const response = await axios.get(`${BASE_URL}/games/${gameId}`, {
-    params: { key: RAWG_API_KEY },
-  });
+  const response = await axios.get(`${BASE_URL}/games/${gameId}`);
   return response.data;
 };
 
-// ⭐ Popular Games
 export const getPopularGames = async (
   page = 1
 ): Promise<SearchGamesResponse> => {
   const response = await axios.get(`${BASE_URL}/games`, {
     params: {
-      key: RAWG_API_KEY,
       ordering: "-rating",
       page,
       page_size: 12,
@@ -68,7 +61,6 @@ export const getPopularGames = async (
   return response.data;
 };
 
-// 🆕 New Releases
 export const getNewReleases = async (
   page = 1
 ): Promise<SearchGamesResponse> => {
@@ -79,7 +71,6 @@ export const getNewReleases = async (
 
   const response = await axios.get(`${BASE_URL}/games`, {
     params: {
-      key: RAWG_API_KEY,
       dates: `${lastYearDate},${currentDate}`,
       ordering: "-released",
       page,

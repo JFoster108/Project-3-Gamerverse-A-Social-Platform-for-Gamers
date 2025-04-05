@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { Request, Response, NextFunction, Application } from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import path from "path";
@@ -93,7 +93,9 @@ async function startServer() {
 
   if (process.env.NODE_ENV === "production") {
     const __dirname = path.resolve();
+  
     app.use(express.static(path.join(__dirname, "../client/dist")));
+  
     app.get("*", (_req, res) => {
       res.sendFile(path.join(__dirname, "../client/dist", "index.html"));
     });
