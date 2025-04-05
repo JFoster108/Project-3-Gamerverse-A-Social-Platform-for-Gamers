@@ -47,43 +47,32 @@ cron.schedule("0 0 * * *", async () => {
 // RAWG API proxy endpoints
 const RAWG_API_KEY = process.env.RAWG_API_KEY || "f4489c2d5bec448384cd31c55ef03eae";
 
-// Tags to exclude from results
-const EXCLUDED_TAGS = [
-  "sexual-content",
-  "nudity",
-  "nsfw",
-  "adult",
-  "mature",
-  "hentai",
-  "sexual",
-  "porn"
-];
-
 app.get("/api/games", async (req: Request, res: Response) => {
   try {
-    // Add safe content filters to any request
-    const safeParams = {
-      ...req.query,
-      exclude_tags: EXCLUDED_TAGS.join(','),
-      exclude_additions: true,
-      key: RAWG_API_KEY
-    };
-
-    // Filter by ESRB rating if not already specified
-    if (!safeParams.esrb_rating) {
-      // Only get games with Everyone (1), Everyone 10+ (2), or Teen (3) ratings
-      // ESRB rating IDs: 1=Everyone, 2=Everyone 10+, 3=Teen, 4=Mature, 5=Adults Only
-      safeParams.esrb_rating = "1,2,3";
-    }
-
     const response = await axios.get("https://api.rawg.io/api/games", {
-      params: safeParams
+      params: {
+        ...req.query,
+        key: RAWG_API_KEY
+      }
     });
-    
     res.json(response.data);
   } catch (error) {
     console.error("RAWG API Error:", error);
     res.status(500).json({ error: "Failed to fetch games data" });
+  }
+});
+
+app.get("/api/games/:id", async (req: Request, res: Response) => {
+  try {
+    const response = await axios.get(`https://api.rawg.io/api/games/${req.params.id}`, {
+      params: {
+        key: RAWG_API_KEY
+      }
+    });
+    res.json(response.data);
+  } catch (error) {
+    console.error("RAWG API Error:", error);
+    res.status(500).json({ error: "Failed to fetch game details" });
   }
 });
 
@@ -96,22 +85,7 @@ app.get("/api/games/:id", async (req: Request, res: Response) => {
       }
     });
     
-    // Check if the game has adult content tags
-    const game = response.data;
-    const hasMatureContent = game.tags?.some((tag: any) => 
-      EXCLUDED_TAGS.includes(tag.slug || '')
-    );
-    
-    if (hasMatureContent) {
-      return res.status(403).json({ error: "Content not appropriate for all audiences" });
-    }
-    
-    res.json(game);
-  } catch (error) {
-    console.error("RAWG API Error:", error);
-    res.status(500).json({ error: "Failed to fetch game details" });
-  }
-});
+  
 
 // Apollo Server setup
 const server = new ApolloServer({
