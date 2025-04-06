@@ -39,13 +39,17 @@ mongoose
   .catch((err) => console.error("MongoDB connection error:", err));
 
 // Schedule daily moderation summary
-cron.schedule("0 0 * * *", async () => {
+cron.schedule("0 0 * **", async () => {
   console.log("Running daily moderation summary email...");
   await sendDailyModerationSummary();
 });
 
 // RAWG API proxy endpoints
-const RAWG_API_KEY = process.env.RAWG_API_KEY || "f4489c2d5bec448384cd31c55ef03eae";
+const RAWG_API_KEY = process.env.RAWG_API_KEY;
+if (!RAWG_API_KEY) {
+  console.error("RAWG_API_KEY not found in environment variables");
+  process.exit(1);
+}
 
 app.get("/api/games", async (req: Request, res: Response) => {
   try {
@@ -90,7 +94,7 @@ const server = new ApolloServer({
 async function startServer() {
   await server.start();
   server.applyMiddleware({ app, cors: false });
-
+  
   if (process.env.NODE_ENV === "production") {
     const __dirname = path.resolve();
   
@@ -100,14 +104,14 @@ async function startServer() {
       res.sendFile(path.join(__dirname, "../client/dist", "index.html"));
     });
   }
-
+  
   // Global error handler
   app.use(errorHandler);
-
+  
   const serverInstance = app.listen(PORT, () =>
     console.log(`Server running on port ${PORT} with GraphQL at /graphql`)
   );
-
+  
   // Graceful shutdown
   process.on("SIGTERM", async () => {
     console.log("SIGTERM received, shutting down...");
@@ -119,5 +123,4 @@ async function startServer() {
 }
 
 startServer();
-
 export default app;
