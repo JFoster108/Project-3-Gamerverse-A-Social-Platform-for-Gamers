@@ -1,16 +1,14 @@
-import express, { Request, Response, NextFunction, Application } from "express";
+import express, { Request, Response, NextFunction } from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import path from "path";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
-import cron from "node-cron";
 import { ApolloServer } from "apollo-server-express";
 import typeDefs from "./graphql/typeDefs";
 import resolvers from "./graphql/resolvers";
 import adminResolvers from "./graphql/resolvers/adminResolvers";
 import { createContext } from "./utils/context";
-import { sendDailyModerationSummary } from "./utils/moderationUtils";
 import { errorHandler } from "./middleware/errorHandler";
 import axios from "axios";
 
@@ -37,12 +35,6 @@ mongoose
   .connect(process.env.MONGO_URI as string)
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("MongoDB connection error:", err));
-
-// Schedule daily moderation summary
-cron.schedule("0 0 * **", async () => {
-  console.log("Running daily moderation summary email...");
-  await sendDailyModerationSummary();
-});
 
 // RAWG API proxy endpoints
 const RAWG_API_KEY = process.env.RAWG_API_KEY;
