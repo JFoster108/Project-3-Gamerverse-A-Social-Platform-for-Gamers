@@ -10,7 +10,7 @@ import resolvers from "./graphql/resolvers";
 import adminResolvers from "./graphql/resolvers/adminResolvers";
 import { createContext } from "./utils/context";
 import { errorHandler } from "./middleware/errorHandler";
-import axios from "axios";
+
 
 dotenv.config();
 
