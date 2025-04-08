@@ -46,7 +46,12 @@ if (!RAWG_API_KEY) {
 app.get("/api/games", async (req: Request, res: Response) => {
   try {
     const url = new URL("https://api.rawg.io/api/games");
-    Object.keys(req.query).forEach(key => url.searchParams.append(key, req.query[key]));
+    Object.keys(req.query).forEach(key => {
+      const value = req.query[key];
+      if (typeof value === 'string') { // Only append if it's a string
+        url.searchParams.append(key, value);
+      }
+    });
     url.searchParams.append('key', RAWG_API_KEY);
 
     const response = await fetch(url.toString());
