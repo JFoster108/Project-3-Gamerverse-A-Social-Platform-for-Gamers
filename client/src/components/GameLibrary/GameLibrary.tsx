@@ -172,8 +172,7 @@ const GameLibrary: React.FC = () => {
     ]);
   }, []);
 
-  // Combine games with user status
-  const combinedGames = games.map((game) => {
+  const combinedGames = games?.map((game) => {
     const userGame = userLibrary.find((ug) => ug.gameId === game.id);
     if (userGame) {
       return {
@@ -183,7 +182,8 @@ const GameLibrary: React.FC = () => {
       };
     }
     return game;
-  });
+  }) || [];
+  
 
   // Filter games based on status if in library view
   const filteredGames =

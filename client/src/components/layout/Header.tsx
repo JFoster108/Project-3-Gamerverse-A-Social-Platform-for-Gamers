@@ -1,6 +1,3 @@
-// src/components/layout/Header.tsx
-// Fix the issue with the regular font size property
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -127,6 +124,8 @@ const Header: React.FC<HeaderProps> = ({ toggleTheme, currentTheme }) => {
     </HeaderContainer>
   );
 };
+
+
 
 const HeaderContainer = styled.header`
   background-color: ${({ theme }) => theme.colors.navBackground};
