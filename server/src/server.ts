@@ -10,7 +10,7 @@ import resolvers from "./graphql/resolvers";
 import adminResolvers from "./graphql/resolvers/adminResolvers";
 import { createContext } from "./utils/context";
 import { errorHandler } from "./middleware/errorHandler";
-
+import fetch from "node-fetch";
 
 dotenv.config();
 
@@ -45,13 +45,13 @@ if (!RAWG_API_KEY) {
 
 app.get("/api/games", async (req: Request, res: Response) => {
   try {
-    const response = await axios.get("https://api.rawg.io/api/games", {
-      params: {
-        ...req.query,
-        key: RAWG_API_KEY
-      }
-    });
-    res.json(response.data);
+    const url = new URL("https://api.rawg.io/api/games");
+    Object.keys(req.query).forEach(key => url.searchParams.append(key, req.query[key]));
+    url.searchParams.append('key', RAWG_API_KEY);
+
+    const response = await fetch(url.toString());
+    const data = await response.json();
+    res.json(data);
   } catch (error) {
     console.error("RAWG API Error:", error);
     res.status(500).json({ error: "Failed to fetch games data" });
@@ -60,12 +60,12 @@ app.get("/api/games", async (req: Request, res: Response) => {
 
 app.get("/api/games/:id", async (req: Request, res: Response) => {
   try {
-    const response = await axios.get(`https://api.rawg.io/api/games/${req.params.id}`, {
-      params: {
-        key: RAWG_API_KEY
-      }
-    });
-    res.json(response.data);
+    const url = new URL(`https://api.rawg.io/api/games/${req.params.id}`);
+    url.searchParams.append('key', RAWG_API_KEY);
+
+    const response = await fetch(url.toString());
+    const data = await response.json();
+    res.json(data);
   } catch (error) {
     console.error("RAWG API Error:", error);
     res.status(500).json({ error: "Failed to fetch game details" });
