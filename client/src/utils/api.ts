@@ -1,46 +1,36 @@
-import axios from "axios";
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
 
-// Create an axios instance with base URL
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3001/api",
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
+const fetchWithAuth = async (url, options = {}) => {
+  const token = localStorage.getItem("token");
+  const headers = new Headers({
+    'Content-Type': 'application/json',
+    ...(token && { 'Authorization': `Bearer ${token}` })
+  });
 
-// Add a request interceptor to include auth token
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+  const response = await fetch(`${BASE_URL}${url}`, {
+    ...options,
+    headers,
+  });
 
-// Example API functions (to be implemented with actual backend)
-export const login = async (/* email: string, password: string */) => {
-  try {
-    return {
-      token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-      user: { id: "123", username: "testuser", email: "test@test.com" },
-    };
-  } catch (error) {
-    throw error;
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || "Something went wrong");
   }
+  return data;
 };
 
-export const register = async (/* username: string, email: string, password: string */) => {
-  try {
-    return {
-      token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-      user: { id: "123", username: "testuser", email: "test@test.com" },
-    };
-  } catch (error) {
-    throw error;
-  }
+export const login = async () => {
+  return {
+    token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    user: { id: "123", username: "testuser", email: "test@test.com" },
+  };
 };
 
-export default api;
+export const register = async () => {
+  return {
+    token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    user: { id: "123", username: "testuser", email: "test@test.com" },
+  };
+};
+
+export default fetchWithAuth;

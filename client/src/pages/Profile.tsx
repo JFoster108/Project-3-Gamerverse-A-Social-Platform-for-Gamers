@@ -1,6 +1,3 @@
-// src/pages/Profile.tsx
-// This fixes the TypeScript errors in the Profile component
-
 import React from "react";
 import styled from "styled-components";
 import { useParams, Link } from "react-router-dom";
@@ -217,7 +214,7 @@ const Avatar = styled.img`
 `;
 
 const AvatarEditButton = styled(Link)`
-  position: absolute;
+  position:absolute;
   bottom: 5px;
   right: 5px;
   width: 36px;
@@ -403,7 +400,7 @@ const GameTitle = styled.h3`
 `;
 
 const GamePlatform = styled.span`
-  display: block;
+  display:block;
   font-size: ${({ theme }) => theme.fontSizes.small};
   color: ${({ theme }) => theme.colors.textSecondary};
   margin-bottom: ${({ theme }) => theme.spacing.xs};
@@ -415,7 +412,7 @@ interface GameStatusProps {
 
 const GameStatus = styled.span<GameStatusProps>`
   display: inline-block;
-  padding: ${({ theme }) => `${theme.spacing.xs} ${theme.spacing.sm}`};
+  padding: ${({ theme, status }) => `${theme.spacing.xs} ${theme.spacing.sm}`};
   background-color: ${({ theme, status }) => {
     switch (status) {
       case "Now Playing":
@@ -429,7 +426,7 @@ const GameStatus = styled.span<GameStatusProps>`
       default:
         return `${theme.colors.info}20`;
     }
-  }}; 
+  }};
   color: ${({ theme, status }) => {
     switch (status) {
       case "Now Playing":
