@@ -1,6 +1,7 @@
 # Gamerverse
 ## A Social Platform for Gamers
 ![Gamerverse Banner](./assets/gamerverse-banner.png)
+
 Gamerverse is a comprehensive social platform dedicated to connecting gamers across different platforms, helping them track their gaming journeys, and building a community where gaming experiences can be shared. Whether you're a casual mobile gamer, a dedicated console player, or a hardcore PC enthusiast, Gamerverse provides the tools to catalog your games, share your gaming moments, and connect with fellow gamers.
 ## Features
 ### User Profiles and Authentication
