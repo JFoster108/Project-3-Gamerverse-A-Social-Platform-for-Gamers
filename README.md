@@ -1,6 +1,6 @@
 # Gamerverse
 ## A Social Platform for Gamers
-![Gamerverse Banner](https://via.placeholder.com/1200x300?text=Gamerverse)
+![Gamerverse Banner](https://github.com/your-username/gamerverse/blob/main/path-to-your-image.png)
 Gamerverse is a comprehensive social platform dedicated to connecting gamers across different platforms, helping them track their gaming journeys, and building a community where gaming experiences can be shared. Whether you're a casual mobile gamer, a dedicated console player, or a hardcore PC enthusiast, Gamerverse provides the tools to catalog your games, share your gaming moments, and connect with fellow gamers.
 ## Features
 ### User Profiles and Authentication
@@ -144,8 +144,8 @@ Before running Gamerverse, make sure you have the following installed:
 ## Support and Feedback
 For support, questions, or feedback, please:
 - Create an issue in the GitHub repository
-- Contact the development team at support@gamerverse.example.com
-- Join our Discord community at https://discord.gg/gamerverse
+- Contact the development team at mwelc64@yahoo.com
+
 ## Roadmap
 Upcoming features planned for Gamerverse:
 - **Friends System**: Add friends and see their activity
