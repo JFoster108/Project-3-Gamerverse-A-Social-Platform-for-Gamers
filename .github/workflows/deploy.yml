@@ -1,4 +1,4 @@
-name: Deploy Gamerverse Server
+name: Deploy Gamerverse
 
 on:
   push:
@@ -11,34 +11,60 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout code
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Step 2: Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Cache dependencies
+      # Step 3: Cache dependencies (Root)
+      - name: Cache root dependencies
         uses: actions/cache@v4
         with:
           path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          key: ${{ runner.os }}-node-root-${{ hashFiles('package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-node-
+            ${{ runner.os }}-node-root-
 
-      - name: Install dependencies
-        run: npm install
+      # Step 4: Cache dependencies (Client)
+      - name: Cache client dependencies
+        uses: actions/cache@v4
+        with:
+          path: client/node_modules
+          key: ${{ runner.os }}-node-client-${{ hashFiles('client/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-client-
 
+      # Step 5: Cache dependencies (Server)
+      - name: Cache server dependencies
+        uses: actions/cache@v4
+        with:
+          path: server/node_modules
+          key: ${{ runner.os }}-node-server-${{ hashFiles('server/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-server-
+
+      # Step 6: Install dependencies and build project
+      - name: Install and build project
+        run: |
+          npm install
+          cd client && npm install && npm run build && cd ..
+          cd server && npm install && npm run build && cd ..
+
+      # Step 7: Run tests
       - name: Run tests
-        run: npm run test || echo "Tests failed, but continuing deployment..."
+        run: |
+          npm run test || echo "Tests failed, but continuing deployment..."
 
-      - name: Build project (optional, if you build)
-        run: npm run build
-
-      - name: Deploy to Render
+      # Step 8: Deploy Backend (Full stack) to Render
+      - name: Deploy to Render (Full stack)
         run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
 
+      # Step 9: Email notification - Success
       - name: Send success notification
         if: success()
         uses: dawidd6/action-send-mail@v3
@@ -47,11 +73,14 @@ jobs:
           server_port: 587
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
-          subject: Gamerverse Server Deploy Success 🎉
-          to: your@email.com
+          subject: Gamerverse Deploy Success 🎉
+          to: ${{ secrets.EMAIL_USERNAME }}
           from: Gamerverse Server
-          body: Your main server has been successfully deployed!
+          body: |
+            ✅ Deployment succeeded!
+            View workflow: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
+      # Step 10: Email notification - Failure
       - name: Send failure notification
         if: failure()
         uses: dawidd6/action-send-mail@v3
@@ -60,7 +89,9 @@ jobs:
           server_port: 587
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
-          subject: Gamerverse Server Deploy Failed ❌
-          to: your@email.com
+          subject: Gamerverse Deploy Failed ❌
+          to: ${{ secrets.EMAIL_USERNAME }}
           from: Gamerverse Server
-          body: "Deployment failed. Check logs: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          body: |
+            ❌ Deployment failed!
+            View logs: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
